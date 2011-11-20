@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 	Parser *parser = new Parser();
 	
 	try {
-		std::cout << parser->calculate(inputTerm, false).result << std::endl;
+		std::cout << parser->calculate(inputTerm, true).result << std::endl;
 	}
 	catch ( exception &e )
 	{

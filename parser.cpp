@@ -38,7 +38,7 @@ vector<string>* Parser::lexer(string term)
 	for ( termIter = term.begin(); termIter != term.end(); termIter++ ) {
 		priority = this->getPriority( *termIter );
 		
-		if ( priority == -1 ) {
+		if ( priority == -1 || ( termIter == term.begin() && priority == 10 ) ) {
 			if ( level > 0 ) {
 				tmp += *termIter;
 			}
@@ -117,7 +117,7 @@ Node* Parser::buildTree(Tree **tree, string term)
 	for ( vector<string>::iterator termIter = lexerOutput->begin(); termIter != lexerOutput->end(); termIter++ ) {
 		priority = this->getPriority( (*termIter)[0] );
 		
-		if ( priority != -1 ) {
+		if ( priority != -1 && (*termIter).size() == 1 ) {
 			if ( !operatorStack->empty() ) {
 				OperatorNode *lastNode = static_cast<OperatorNode*>( operatorStack->top() );
 			
