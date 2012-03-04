@@ -1,9 +1,6 @@
+#include <stdlib.h>
 #include <stack>
-#include <string>
-#include <sstream>
 #include <exception>
-#include <boost/lexical_cast.hpp>
-
 #include "tree.h"
 
 struct ParserResult 

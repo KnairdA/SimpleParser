@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include "parser.h"
 
 int main(int argc, char *argv[])
@@ -16,7 +15,7 @@ int main(int argc, char *argv[])
 	catch ( exception &e )
 	{
 		std::cerr << e.what() << std::endl;
-		std::exit(1);
+		exit(1);
 	}
 
 	return 0;

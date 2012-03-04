@@ -1,8 +1,6 @@
 #include "tree.h"
 #include <math.h>
 
-#include <boost/lexical_cast.hpp>
-
 Node::Node()
 {
 
@@ -111,12 +109,12 @@ string Tree::print(string term)
     	switch ( (*it)->type ) {
 			case OPERAND_NODE: {
 				OperandNode *tmp = static_cast<OperandNode*>( *it );
-				out << "node" << i << " [ label = \"" << boost::lexical_cast<string>(tmp->value) << "\"];" << endl;
+				out << "node" << i << " [ label = \"" << tmp->value << "\"];" << endl;
 				break;
 			}
 			case OPERATOR_NODE: {
 				OperatorNode *tmp = static_cast<OperatorNode*>( *it );
-				out << "node" << i << " [ label = \"" << boost::lexical_cast<string>(tmp->function) << "\"];" << endl;
+				out << "node" << i << " [ label = \"" << tmp->function << "\"];" << endl;
 				
 				for ( vector<Node*>::iterator iter = this->nodeCollection->begin(); iter != this->nodeCollection->end(); ++iter ) {
 					if ( *iter == (*it)->leftChild ) {
