@@ -1,21 +1,24 @@
 #include "tree.h"
-#include <math.h>
 
 Node::Node()
 {
 
 }
 
+template <class T> 
+double Node::castSolve (Node *node) {
+	T *tmp = static_cast<T*>( node );
+	return tmp->solve();
+}
+
 double Node::solve()
 {
 	switch (this->type) {
 		case OPERAND_NODE: {
-			OperandNode *tmp = static_cast<OperandNode*>( this );
-			return tmp->solve();
+			return this->castSolve<OperandNode>( this );
 		}
 		case OPERATOR_NODE: {
-			OperatorNode *tmp = static_cast<OperatorNode*>( this );
-			return tmp->solve();
+			return this->castSolve<OperatorNode>( this );
 		}
 	}
 }

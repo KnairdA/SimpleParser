@@ -16,6 +16,9 @@ class Node
 	public:
 		Node();
 		double solve();
+
+		template <class T>
+		double castSolve(Node*);
 		
 		Node *leftChild;
 		Node *rightChild;

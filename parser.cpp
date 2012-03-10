@@ -114,7 +114,7 @@ Node* Parser::buildTree(Tree **tree, string term)
 
 	vector<string> *tmpLexer;
 
-	vector<string> *lexerOutput = lexer(term);
+	vector<string> *lexerOutput = this->lexer(term);
 
 	for ( vector<string>::iterator termIter = lexerOutput->begin(); termIter != lexerOutput->end(); termIter++ ) {
 		priority = this->getPriority( (*termIter)[0] );
@@ -150,7 +150,7 @@ Node* Parser::buildTree(Tree **tree, string term)
 			}
 		}
 		else {
-			tmpLexer = lexer( *termIter );
+			tmpLexer = this->lexer( *termIter );
 
 			if ( tmpLexer->size() == 1 ) {
 				operandStack->push( 
