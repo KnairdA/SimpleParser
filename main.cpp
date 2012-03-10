@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 #include "parser.h"
 
 int main(int argc, char *argv[])
@@ -10,7 +11,10 @@ int main(int argc, char *argv[])
 	Parser *parser = new Parser();
 	
 	try {
-		std::cout << parser->calculate(inputTerm, true).result << std::endl;
+		typedef std::numeric_limits<double> dbl;
+		std::cout.precision(dbl::digits10);
+
+		std::cout << parser->calculate(inputTerm, false).result << std::endl;
 	}
 	catch ( exception &e )
 	{

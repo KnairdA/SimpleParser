@@ -1,4 +1,5 @@
 #include "tree.h"
+#include <limits>
 
 Node::Node()
 {
@@ -103,6 +104,9 @@ Node* Tree::addOperator(Node **place, char oper)
 string Tree::print(string term)
 {
 	std::stringstream out;
+
+	typedef std::numeric_limits<double> dbl;
+	out.precision(dbl::digits10);
 	
 	out << "digraph \"" << term << "\"" << endl << "{" << endl << "node [shape = box];" << endl;
 	
