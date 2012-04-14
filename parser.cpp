@@ -24,14 +24,14 @@ int Parser::getPriority(char tmp)
 	}
 }
 
-vector<string>* Parser::lexer(string term)
+vector<string> Parser::lexer(string term)
 {
 	int priority = 0;
 	int last_priority = 0;
 	int level = 0;
 	string tmp, tmp_num;
 
-	vector<string> *output = new vector<string>();
+	vector<string> output;
 
 	string::iterator termIter;
 
@@ -48,7 +48,7 @@ vector<string>* Parser::lexer(string term)
 		}
 		else {
 			if ( last_priority == -1 && level == 0 ) {
-				output->push_back( tmp_num );
+				output.push_back( tmp_num );
 				tmp_num = "";
 			}
 
@@ -65,7 +65,7 @@ vector<string>* Parser::lexer(string term)
 					level--;
 
 					if ( level == 0 ) {
-						output->push_back( tmp );
+						output.push_back( tmp );
 						tmp = "";
 					}
 					else {
@@ -78,7 +78,7 @@ vector<string>* Parser::lexer(string term)
 						string helper;
 						helper = *termIter;
 
-						output->push_back( helper );
+						output.push_back( helper );
 					}
 					else {
 						tmp += *termIter;
@@ -92,7 +92,7 @@ vector<string>* Parser::lexer(string term)
 	}
 
 	if ( last_priority == -1 ) {
-		output->push_back( tmp_num );
+		output.push_back( tmp_num );
 	}
 	else if ( last_priority != 90 ) {
 		throw operator_exception();
@@ -105,95 +105,95 @@ vector<string>* Parser::lexer(string term)
 	return output;
 }
 
-Node* Parser::buildTree(Tree **tree, string term)
+Node* Parser::buildTree(Tree *tree, string term)
 {
-	stack<Node*> *operandStack = new stack<Node*>();
-	stack<Node*> *operatorStack = new stack<Node*>();
+	stack<Node*> operandStack;
+	stack<Node*> operatorStack;
 
 	int priority;
 
-	vector<string> *tmpLexer;
+	vector<string> tmpLexer;
 
-	vector<string> *lexerOutput = this->lexer(term);
+	vector<string> lexerOutput = this->lexer(term);
 
-	for ( vector<string>::iterator termIter = lexerOutput->begin(); termIter != lexerOutput->end(); termIter++ ) {
+	for ( vector<string>::iterator termIter = lexerOutput.begin(); termIter != lexerOutput.end(); termIter++ ) {
 		priority = this->getPriority( (*termIter)[0] );
 
 		if ( priority != -1 && (*termIter).size() == 1 ) {
-			if ( !operatorStack->empty() ) {
-				OperatorNode *lastNode = static_cast<OperatorNode*>( operatorStack->top() );
+			if ( !operatorStack.empty() ) {
+				OperatorNode *lastNode = static_cast<OperatorNode*>( operatorStack.top() );
 
 				if ( this->getPriority( lastNode->function ) < priority ) {
-					operatorStack->push( 
-						(*tree)->addOperator( NULL, (*termIter)[0] )
+					operatorStack.push( 
+						tree->addOperator( NULL, (*termIter)[0] )
 					);
 				}
 				else {
-					Node *currOperator = operatorStack->top();
-					operatorStack->pop();
+					Node *currOperator = operatorStack.top();
+					operatorStack.pop();
 
-					currOperator->rightChild = operandStack->top();
-					operandStack->pop();
+					currOperator->rightChild = operandStack.top();
+					operandStack.pop();
 
-					currOperator->leftChild = operandStack->top();
-					operandStack->pop();
+					currOperator->leftChild = operandStack.top();
+					operandStack.pop();
 
-					operandStack->push( currOperator );
+					operandStack.push( currOperator );
 
 					termIter--;
 				}
 			}
 			else {
-				operatorStack->push( 
-					(*tree)->addOperator( NULL, (*termIter)[0] )
+				operatorStack.push( 
+					tree->addOperator( NULL, (*termIter)[0] )
 				);
 			}
 		}
 		else {
 			tmpLexer = this->lexer( *termIter );
 
-			if ( tmpLexer->size() == 1 ) {
-				operandStack->push( 
-					(*tree)->addOperand( NULL, 
+			if ( tmpLexer.size() == 1 ) {
+				operandStack.push( 
+					tree->addOperand( NULL, 
 						strtod( termIter->c_str(), NULL ) 
 					)
 				);
 			}
-			else if ( tmpLexer->size() > 1 ) {
-				operandStack->push( 
+			else if ( tmpLexer.size() > 1 ) {
+				operandStack.push( 
 					buildTree(tree, *termIter) 
 				);
 			}
 		}
 	}
 
-	while ( !operatorStack->empty() ) {
-		OperatorNode *currOperator = static_cast<OperatorNode*>( operatorStack->top() );
-		operatorStack->pop();
+	while ( !operatorStack.empty() ) {
+		OperatorNode *currOperator = static_cast<OperatorNode*>( operatorStack.top() );
+		operatorStack.pop();
 
-		currOperator->rightChild = operandStack->top();
-		operandStack->pop();
+		currOperator->rightChild = operandStack.top();
+		operandStack.pop();
 
-		currOperator->leftChild = operandStack->top();
-		operandStack->pop();
+		currOperator->leftChild = operandStack.top();
+		operandStack.pop();
 
-		operandStack->push( currOperator );
+		operandStack.push( currOperator );
 	}
 
-	return operandStack->top();
+	return operandStack.top();
 }
 
 ParserResult Parser::calculate(string term, bool getTreeAsDot)
 {
-	Tree *termTree = new Tree();
-	termTree->root = buildTree(&termTree, term);
+	Tree termTree;
+	termTree.root = this->buildTree(&termTree, term);
 
 	ParserResult returnVal;
 
-	returnVal.result = termTree->root->solve();
+	returnVal.result = termTree.root->solve();
 
 	if ( getTreeAsDot ) {
-		returnVal.tree = termTree->print(term);
+		returnVal.tree = termTree.print(term);
 	}
 
 	return returnVal;

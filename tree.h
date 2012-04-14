@@ -47,6 +47,7 @@ class Tree
 {
 	public:
 		Tree();
+		~Tree();
 		
 		Node *root;
 		

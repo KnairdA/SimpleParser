@@ -69,11 +69,20 @@ Tree::Tree()
 	this->nodeCollection = new vector<Node*>();
 }
 
+Tree::~Tree()
+{
+	for ( vector<Node*>::iterator it = this->nodeCollection->begin(); it != this->nodeCollection->end(); it++ )
+	{
+		delete *it;
+	}
+
+	delete this->nodeCollection;
+}
+
 Node* Tree::addOperand(Node **place, double value)
 {
 	OperandNode *newNode = new OperandNode();
 	
-	newNode = new OperandNode();
 	newNode->value = value;
 	
 	this->nodeCollection->push_back( newNode ); 
@@ -89,7 +98,6 @@ Node* Tree::addOperator(Node **place, char oper)
 {	
 	OperatorNode *newNode = new OperatorNode();
 	
-	newNode = new OperatorNode();
 	newNode->function = oper;
 	
 	this->nodeCollection->push_back( newNode ); 

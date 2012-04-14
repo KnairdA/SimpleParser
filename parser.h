@@ -16,8 +16,8 @@ class Parser
 	
 	private:
 	 	int getPriority(char);
-	 	vector<string>* lexer(string);
-	 	Node* buildTree(Tree**, string);
+	 	vector<string> lexer(string);
+	 	Node* buildTree(Tree*, string);
 };
 
 class parenthese_exception: public exception
