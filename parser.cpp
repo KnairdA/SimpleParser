@@ -102,6 +102,10 @@ vector<string> Parser::lexer(string term)
 		throw parenthese_exception();
 	}
 
+	if ( last_priority == 90 && output.size() == 1 ) {
+		output = lexer(output[0]);
+	}
+
 	return output;
 }
 
@@ -155,7 +159,7 @@ Node* Parser::buildTree(Tree *tree, string term)
 			if ( tmpLexer.size() == 1 ) {
 				operandStack.push( 
 					tree->addOperand( NULL, 
-						strtod( termIter->c_str(), NULL ) 
+						strtod( tmpLexer[0].c_str(), NULL )
 					)
 				);
 			}
