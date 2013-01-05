@@ -1,9 +1,8 @@
-#ifndef PARSER_PARSER_H_
-#define PARSER_PARSER_H_
+#ifndef PARSER_SRC_PARSER_H_
+#define PARSER_SRC_PARSER_H_
 
 #include <vector>
 #include <stack>
-#include <exception>
 
 #include "tree.h"
 
@@ -19,18 +18,6 @@ class Parser {
 		Node* buildTree(Tree*, std::string);
 };
 
-class parenthese_exception: public std::exception {
-	virtual const char* what() const throw() {
-		return "Invalid parenthesized expression - check your input term.";
-	}
-};
-
-class operator_exception: public std::exception {
-	virtual const char* what() const throw() {
-		return "Unexpected operator placement - check your input term.";
-	}
-};
-
 }
 
-#endif  // PARSER_PARSER_H_
+#endif  // PARSER_SRC_PARSER_H_

@@ -1,4 +1,5 @@
 #include "parser.h"
+#include "exceptions.h"
 
 #include <sstream>
 

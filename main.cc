@@ -3,7 +3,7 @@
 
 #include "src/parser.h"
 
-int main(int argc, char *argv[])
+int main()
 {
 	std::string inputTerm;
 	
