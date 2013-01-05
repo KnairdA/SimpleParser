@@ -1,47 +1,36 @@
 #include "tree.h"
+
 #include <limits>
 
-Node::Node()
-{
+namespace SimpleParser {
 
+OperandNode::OperandNode(double val) {
+	this->value_ = val;
 }
 
-template <class T> 
-double Node::castSolve (Node *node) {
-	T *tmp = static_cast<T*>( node );
-	return tmp->solve();
+double OperandNode::solve() {
+	return this->value_;
 }
 
-double Node::solve()
-{
-	switch (this->type) {
-		case OPERAND_NODE: {
-			return this->castSolve<OperandNode>( this );
-		}
-		case OPERATOR_NODE: {
-			return this->castSolve<OperatorNode>( this );
-		}
-	}
+NodeType OperandNode::getType() {
+	return OPERAND_NODE;
 }
 
-OperandNode::OperandNode()
-{
-	this->type = OPERAND_NODE;
+std::string OperandNode::print() {
+	std::stringstream convertStream;
+	convertStream.precision(std::numeric_limits<double>::digits10);
+
+	convertStream << this->value_;
+
+	return convertStream.str();
 }
 
-double OperandNode::solve()
-{
-	return this->value;
+OperatorNode::OperatorNode(char op) {
+	this->function_ = op;
 }
 
-OperatorNode::OperatorNode()
-{
-	this->type = OPERATOR_NODE;
-}
-
-double OperatorNode::solve()
-{
-	switch (this->function) {
+double OperatorNode::solve() {
+	switch ( this->function_ ) {
 		case '*':
 			return this->leftChild->solve() * this->rightChild->solve();
 		case '/': {
@@ -59,95 +48,72 @@ double OperatorNode::solve()
 		case '-':
 			return this->leftChild->solve() - this->rightChild->solve();
 		case '^':
-			return pow( this->leftChild->solve(), this->rightChild->solve() );
+			return std::pow( this->leftChild->solve(), this->rightChild->solve() );
 	}
 }
 
-
-Tree::Tree()
-{
-	this->nodeCollection = new vector<Node*>();
+NodeType OperatorNode::getType() {
+	return OPERATOR_NODE;
 }
 
-Tree::~Tree()
-{
-	for ( vector<Node*>::iterator it = this->nodeCollection->begin(); it != this->nodeCollection->end(); it++ )
-	{
-		delete *it;
+std::string OperatorNode::print() {
+	return std::string(1, this->function_);
+}
+
+char OperatorNode::getFunction() {
+	return this->function_;
+}
+
+Node* Tree::addOperand(Node **place, double value) {
+	this->node_collection_.emplace_back(new OperandNode(value));
+
+	if ( place != nullptr ) {
+		*place = this->node_collection_.back().get();
 	}
 
-	delete this->nodeCollection;
+	return this->node_collection_.back().get();
 }
 
-Node* Tree::addOperand(Node **place, double value)
-{
-	OperandNode *newNode = new OperandNode();
-	
-	newNode->value = value;
-	
-	this->nodeCollection->push_back( newNode ); 
-	
-	if (place != NULL) {
-		*place = this->nodeCollection->back();
+Node* Tree::addOperator(Node **place, char oper) {
+	this->node_collection_.emplace_back(new OperatorNode(oper));
+
+	if ( place != nullptr ) {
+		*place = this->node_collection_.back().get();
 	}
-	
-	return newNode;
+
+	return this->node_collection_.back().get();
 }
 
-Node* Tree::addOperator(Node **place, char oper)
-{	
-	OperatorNode *newNode = new OperatorNode();
-	
-	newNode->function = oper;
-	
-	this->nodeCollection->push_back( newNode ); 
-	
-	if (place != NULL) {
-		*place = this->nodeCollection->back();
-	}
-	
-	return newNode;
-}
-
-string Tree::print(string term)
-{
+std::string Tree::print(std::string term) {
 	std::stringstream out;
+	out.precision(std::numeric_limits<double>::digits10);
 
-	typedef std::numeric_limits<double> dbl;
-	out.precision(dbl::digits10);
-	
-	out << "digraph \"" << term << "\"" << endl << "{" << endl << "node [shape = box];" << endl;
-	
+	out << "digraph \"" << term << "\"" << std::endl
+		<< "{"  << std::endl
+		<< "node [shape = box];" << std::endl;
+
 	int i = 0;
-	
-	for ( vector<Node*>::iterator it = this->nodeCollection->begin(); it != this->nodeCollection->end(); ++it ) {
-    	switch ( (*it)->type ) {
-			case OPERAND_NODE: {
-				OperandNode *tmp = static_cast<OperandNode*>( *it );
-				out << "node" << i << " [ label = \"" << tmp->value << "\"];" << endl;
-				break;
-			}
-			case OPERATOR_NODE: {
-				OperatorNode *tmp = static_cast<OperatorNode*>( *it );
-				out << "node" << i << " [ label = \"" << tmp->function << "\"];" << endl;
-				
-				for ( vector<Node*>::iterator iter = this->nodeCollection->begin(); iter != this->nodeCollection->end(); ++iter ) {
-					if ( *iter == (*it)->leftChild ) {
-						out << "\"node" << i << "\" -> \"node" << (iter - this->nodeCollection->begin()) << "\";" << endl;
-					}
-					if ( *iter == (*it)->rightChild ) {
-						out << "\"node" << i << "\" -> \"node" << (iter - this->nodeCollection->begin()) << "\";" << endl;
-					}
+
+	for ( auto it = this->node_collection_.begin(); it != this->node_collection_.end(); ++it ) {
+		out << "node" << i << " [ label = \"" << (*it)->print() << "\"];" << std::endl;
+
+		if ( (*it)->getType() == OPERATOR_NODE ) {
+			for ( auto iter = this->node_collection_.begin(); iter != this->node_collection_.end(); ++iter ) {
+				if ( (*iter).get() == (*it)->leftChild ) {
+					out << "\"node" << i << "\" -> \"node" << (iter - this->node_collection_.begin()) << "\";" << std::endl;
 				}
-				
-				break;
+				if ( (*iter).get() == (*it)->rightChild ) {
+					out << "\"node" << i << "\" -> \"node" << (iter - this->node_collection_.begin()) << "\";" << std::endl;
+				}
 			}
 		}
-		
+
 		i++;
 	}
 	
-	out << "}" << endl;
+	out << "}" << std::endl;
 	
 	return out.str();
+}
+
 }

@@ -1,37 +1,36 @@
-#include <stdlib.h>
+#ifndef PARSER_PARSER_H_
+#define PARSER_PARSER_H_
+
+#include <vector>
 #include <stack>
 #include <exception>
+
 #include "tree.h"
 
-struct ParserResult 
-{
-	double result;
-	string tree;	
-};
+namespace SimpleParser {
 
-class Parser
-{
+class Parser {
 	public:
-		ParserResult calculate(string, bool);
+		double calculate(std::string);
 	
 	private:
-	 	int getPriority(char);
-	 	vector<string> lexer(string);
-	 	Node* buildTree(Tree*, string);
+		int8_t getPriority(char);
+		std::vector<std::string> lexer(std::string);
+		Node* buildTree(Tree*, std::string);
 };
 
-class parenthese_exception: public exception
-{
-	virtual const char* what() const throw()
-	{
+class parenthese_exception: public std::exception {
+	virtual const char* what() const throw() {
 		return "Invalid parenthesized expression - check your input term.";
 	}
 };
 
-class operator_exception: public exception
-{
-	virtual const char* what() const throw()
-	{
+class operator_exception: public std::exception {
+	virtual const char* what() const throw() {
 		return "Unexpected operator placement - check your input term.";
 	}
 };
+
+}
+
+#endif  // PARSER_PARSER_H_

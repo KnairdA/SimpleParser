@@ -1,6 +1,10 @@
 #include "parser.h"
 
-int Parser::getPriority(char tmp)
+#include <sstream>
+
+namespace SimpleParser {
+
+int8_t Parser::getPriority(char tmp)
 {
 	switch ( tmp ) {
 		case '-':
@@ -24,32 +28,30 @@ int Parser::getPriority(char tmp)
 	}
 }
 
-vector<string> Parser::lexer(string term)
+std::vector<std::string> Parser::lexer(std::string term)
 {
-	int priority = 0;
-	int last_priority = 0;
-	int level = 0;
-	string tmp, tmp_num;
+	std::string tmp;
+	std::string tmpNum;
+	std::string::iterator termIter;
+	std::vector<std::string> output;
 
-	vector<string> output;
-
-	string::iterator termIter;
+	int8_t   priority     = 0;
+	int8_t   lastPriority = 0;
+	uint32_t level        = 0;
 
 	for ( termIter = term.begin(); termIter != term.end(); termIter++ ) {
-		priority = this->getPriority( *termIter );
+		priority = this->getPriority(*termIter);
 
 		if ( priority == -1 || ( termIter == term.begin() && priority == 10 ) ) {
 			if ( level > 0 ) {
 				tmp += *termIter;
+			} else {
+				tmpNum += *termIter;
 			}
-			else {
-				tmp_num += *termIter;
-			}
-		}
-		else {
-			if ( last_priority == -1 && level == 0 ) {
-				output.push_back( tmp_num );
-				tmp_num = "";
+		} else {
+			if ( lastPriority == -1 && level == 0 ) {
+				output.push_back(tmpNum);
+				tmpNum.clear();
 			}
 
 			switch ( *termIter ) {
@@ -65,8 +67,8 @@ vector<string> Parser::lexer(string term)
 					level--;
 
 					if ( level == 0 ) {
-						output.push_back( tmp );
-						tmp = "";
+						output.push_back(tmp);
+						tmp.clear();
 					}
 					else {
 						tmp += *termIter;
@@ -75,10 +77,10 @@ vector<string> Parser::lexer(string term)
 				}
 				default: {
 					if ( level == 0 ) {
-						string helper;
+						std::string helper;
 						helper = *termIter;
 
-						output.push_back( helper );
+						output.push_back(helper);
 					}
 					else {
 						tmp += *termIter;
@@ -88,13 +90,12 @@ vector<string> Parser::lexer(string term)
 			}
 		}
 
-		last_priority = priority;
+		lastPriority = priority;
 	}
 
-	if ( last_priority == -1 ) {
-		output.push_back( tmp_num );
-	}
-	else if ( last_priority != 90 ) {
+	if ( lastPriority == -1 ) {
+		output.push_back(tmpNum);
+	} else if ( lastPriority != 90 ) {
 		throw operator_exception();
 	}
 
@@ -102,37 +103,35 @@ vector<string> Parser::lexer(string term)
 		throw parenthese_exception();
 	}
 
-	if ( last_priority == 90 && output.size() == 1 ) {
+	if ( lastPriority == 90 && output.size() == 1 ) {
 		output = lexer(output[0]);
 	}
 
 	return output;
 }
 
-Node* Parser::buildTree(Tree *tree, string term)
-{
-	stack<Node*> operandStack;
-	stack<Node*> operatorStack;
+Node* Parser::buildTree(Tree *tree, std::string term) {
+	std::stack<Node*> operandStack;
+	std::stack<Node*> operatorStack;
 
-	int priority;
+	std::vector<std::string> tmpLexer;
+	std::vector<std::string> lexerOutput = this->lexer(term);
 
-	vector<string> tmpLexer;
+	int8_t priority;
 
-	vector<string> lexerOutput = this->lexer(term);
-
-	for ( vector<string>::iterator termIter = lexerOutput.begin(); termIter != lexerOutput.end(); termIter++ ) {
-		priority = this->getPriority( (*termIter)[0] );
+	for ( auto termIter = lexerOutput.begin(); termIter != lexerOutput.end(); termIter++ ) {
+		std::string& currTerm = (*termIter);
+		priority              = this->getPriority(currTerm[0]);
 
 		if ( priority != -1 && (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
-				OperatorNode *lastNode = static_cast<OperatorNode*>( operatorStack.top() );
+				OperatorNode *lastNode = static_cast<OperatorNode*>(operatorStack.top());
 
-				if ( this->getPriority( lastNode->function ) < priority ) {
+				if ( this->getPriority(lastNode->getFunction()) < priority ) {
 					operatorStack.push( 
-						tree->addOperator( NULL, (*termIter)[0] )
+						tree->addOperator(nullptr, currTerm[0])
 					);
-				}
-				else {
+				} else {
 					Node *currOperator = operatorStack.top();
 					operatorStack.pop();
 
@@ -146,33 +145,27 @@ Node* Parser::buildTree(Tree *tree, string term)
 
 					termIter--;
 				}
+			} else {
+				operatorStack.push(tree->addOperator(nullptr, currTerm[0]));
 			}
-			else {
-				operatorStack.push( 
-					tree->addOperator( NULL, (*termIter)[0] )
-				);
-			}
-		}
-		else {
-			tmpLexer = this->lexer( *termIter );
+		} else {
+			tmpLexer = this->lexer(*termIter);
 
 			if ( tmpLexer.size() == 1 ) {
-				operandStack.push( 
-					tree->addOperand( NULL, 
-						strtod( tmpLexer[0].c_str(), NULL )
-					)
-				);
+				double value;
+				std::istringstream convertStream(tmpLexer[0]);
+				convertStream >> value;
+
+				operandStack.push(tree->addOperand(nullptr,value));
 			}
 			else if ( tmpLexer.size() > 1 ) {
-				operandStack.push( 
-					buildTree(tree, *termIter) 
-				);
+				operandStack.push(buildTree(tree, *termIter));
 			}
 		}
 	}
 
 	while ( !operatorStack.empty() ) {
-		OperatorNode *currOperator = static_cast<OperatorNode*>( operatorStack.top() );
+		OperatorNode *currOperator = static_cast<OperatorNode*>(operatorStack.top());
 		operatorStack.pop();
 
 		currOperator->rightChild = operandStack.top();
@@ -181,24 +174,17 @@ Node* Parser::buildTree(Tree *tree, string term)
 		currOperator->leftChild = operandStack.top();
 		operandStack.pop();
 
-		operandStack.push( currOperator );
+		operandStack.push(currOperator);
 	}
 
 	return operandStack.top();
 }
 
-ParserResult Parser::calculate(string term, bool getTreeAsDot)
-{
+double Parser::calculate(std::string term) {
 	Tree termTree;
 	termTree.root = this->buildTree(&termTree, term);
 
-	ParserResult returnVal;
+	return termTree.root->solve();
+}
 
-	returnVal.result = termTree.root->solve();
-
-	if ( getTreeAsDot ) {
-		returnVal.tree = termTree.print(term);
-	}
-
-	return returnVal;
 }
