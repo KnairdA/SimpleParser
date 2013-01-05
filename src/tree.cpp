@@ -64,7 +64,15 @@ char OperatorNode::getFunction() {
 	return this->function_;
 }
 
-Node* Tree::addOperand(Node **place, double value) {
+void Tree::setRoot(Node* root) {
+	this->root_node_ = root;
+}
+
+double Tree::solve() {
+	return this->root_node_->solve();
+}
+
+Node* Tree::addOperand(Node** place, double value) {
 	this->node_collection_.emplace_back(new OperandNode(value));
 
 	if ( place != nullptr ) {
@@ -74,7 +82,7 @@ Node* Tree::addOperand(Node **place, double value) {
 	return this->node_collection_.back().get();
 }
 
-Node* Tree::addOperator(Node **place, char oper) {
+Node* Tree::addOperator(Node** place, char oper) {
 	this->node_collection_.emplace_back(new OperatorNode(oper));
 
 	if ( place != nullptr ) {

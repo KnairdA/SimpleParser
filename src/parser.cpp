@@ -182,9 +182,9 @@ Node* Parser::buildTree(Tree *tree, std::string term) {
 
 double Parser::calculate(std::string term) {
 	Tree termTree;
-	termTree.root = this->buildTree(&termTree, term);
+	termTree.setRoot(this->buildTree(&termTree, term));
 
-	return termTree.root->solve();
+	return termTree.solve();
 }
 
 }

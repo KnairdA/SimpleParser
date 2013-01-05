@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
-#include "parser.h"
+
+#include "src/parser.h"
 
 int main(int argc, char *argv[])
 {

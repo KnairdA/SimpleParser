@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "src/parser.h"
 #include "gtest/gtest.h"
 
 class ParserTest : public ::testing::Test {

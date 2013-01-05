@@ -55,7 +55,8 @@ class OperandNode: public Node {
 
 class Tree {
 	public:
-		Node* root;
+		void setRoot(Node*);
+		double solve();
 
 		Node* addOperand(Node**, double);
 		Node* addOperator(Node**, char);
@@ -63,6 +64,7 @@ class Tree {
 		std::string print(std::string);
 
 	private:
+		Node* root_node_;
 		std::vector<std::unique_ptr<Node>> node_collection_;
 };
 

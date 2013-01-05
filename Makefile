@@ -1,4 +1,4 @@
-LIB_FILES  = tree.cpp parser.cpp
+LIB_FILES  = src/tree.cpp src/parser.cpp
 PROG_FILES = main.cpp
 TEST_FILES = test.cpp
 
