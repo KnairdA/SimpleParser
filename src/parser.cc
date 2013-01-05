@@ -5,8 +5,16 @@
 
 namespace SimpleParser {
 
-int8_t Parser::getPriority(char tmp)
-{
+double calculate(std::string term) {
+	Tree termTree;
+	termTree.setRoot(buildTree(&termTree, term));
+
+	return termTree.solve();
+}
+
+namespace {
+
+int8_t getPriority(char tmp) {
 	switch ( tmp ) {
 		case '-':
 			return 10;
@@ -29,8 +37,7 @@ int8_t Parser::getPriority(char tmp)
 	}
 }
 
-std::vector<std::string> Parser::lexer(std::string term)
-{
+std::vector<std::string> lexer(std::string term) {
 	std::string tmp;
 	std::string tmpNum;
 	std::string::iterator termIter;
@@ -41,7 +48,7 @@ std::vector<std::string> Parser::lexer(std::string term)
 	uint32_t level        = 0;
 
 	for ( termIter = term.begin(); termIter != term.end(); termIter++ ) {
-		priority = this->getPriority(*termIter);
+		priority = getPriority(*termIter);
 
 		if ( priority == -1 || ( termIter == term.begin() && priority == 10 ) ) {
 			if ( level > 0 ) {
@@ -111,24 +118,24 @@ std::vector<std::string> Parser::lexer(std::string term)
 	return output;
 }
 
-Node* Parser::buildTree(Tree *tree, std::string term) {
+Node* buildTree(Tree *tree, std::string term) {
 	std::stack<Node*> operandStack;
 	std::stack<Node*> operatorStack;
 
 	std::vector<std::string> tmpLexer;
-	std::vector<std::string> lexerOutput = this->lexer(term);
+	std::vector<std::string> lexerOutput = lexer(term);
 
 	int8_t priority;
 
 	for ( auto termIter = lexerOutput.begin(); termIter != lexerOutput.end(); termIter++ ) {
 		std::string& currTerm = (*termIter);
-		priority              = this->getPriority(currTerm[0]);
+		priority              = getPriority(currTerm[0]);
 
 		if ( priority != -1 && (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
 				OperatorNode *lastNode = static_cast<OperatorNode*>(operatorStack.top());
 
-				if ( this->getPriority(lastNode->getFunction()) < priority ) {
+				if ( getPriority(lastNode->getFunction()) < priority ) {
 					operatorStack.push( 
 						tree->addOperator(nullptr, currTerm[0])
 					);
@@ -150,7 +157,7 @@ Node* Parser::buildTree(Tree *tree, std::string term) {
 				operatorStack.push(tree->addOperator(nullptr, currTerm[0]));
 			}
 		} else {
-			tmpLexer = this->lexer(*termIter);
+			tmpLexer = lexer(*termIter);
 
 			if ( tmpLexer.size() == 1 ) {
 				double value;
@@ -181,11 +188,6 @@ Node* Parser::buildTree(Tree *tree, std::string term) {
 	return operandStack.top();
 }
 
-double Parser::calculate(std::string term) {
-	Tree termTree;
-	termTree.setRoot(this->buildTree(&termTree, term));
-
-	return termTree.solve();
 }
 
-}
+}  // SimpleParser

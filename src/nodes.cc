@@ -74,4 +74,4 @@ char OperatorNode::getFunction() {
 	return this->function_;
 }
 
-}
+}  // SimpleParser

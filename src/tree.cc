@@ -66,4 +66,4 @@ std::string Tree::print(std::string term) {
 	return out.str();
 }
 
-}
+}  // SimpleParser

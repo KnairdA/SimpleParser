@@ -8,15 +8,13 @@
 
 namespace SimpleParser {
 
-class Parser {
-	public:
-		double calculate(std::string);
-	
-	private:
-		int8_t getPriority(char);
-		std::vector<std::string> lexer(std::string);
-		Node* buildTree(Tree*, std::string);
-};
+double calculate(std::string);
+
+namespace {
+	int8_t getPriority(char);
+	std::vector<std::string> lexer(std::string);
+	Node* buildTree(Tree*, std::string);
+}
 
 }
 
