@@ -38,22 +38,40 @@ std::string Tree::print(std::string term) {
 	std::stringstream out;
 	out.precision(std::numeric_limits<double>::digits10);
 
-	out << "digraph \"" << term << "\"" << std::endl
-		<< "{"  << std::endl
-		<< "node [shape = box];" << std::endl;
+	out << "digraph \""
+		<< term
+		<< "\""
+		<< std::endl;
+	out << "{" << std::endl;
+	out << "node [shape = box];" << std::endl;
 
 	int i = 0;
 
 	for ( auto it = this->node_collection_.begin(); it != this->node_collection_.end(); ++it ) {
-		out << "node" << i << " [ label = \"" << (*it)->print() << "\"];" << std::endl;
+		out << "node"
+			<< i
+			<< " [ label = \""
+			<< (*it)->print()
+			<< "\"];"
+			<< std::endl;
 
 		if ( (*it)->getType() == OPERATOR_NODE ) {
 			for ( auto iter = this->node_collection_.begin(); iter != this->node_collection_.end(); ++iter ) {
 				if ( (*iter).get() == (*it)->leftChild ) {
-					out << "\"node" << i << "\" -> \"node" << (iter - this->node_collection_.begin()) << "\";" << std::endl;
+					out << "\"node"
+						<< i
+						<< "\" -> \"node"
+						<< (iter - this->node_collection_.begin())
+						<< "\";"
+						<< std::endl;
 				}
 				if ( (*iter).get() == (*it)->rightChild ) {
-					out << "\"node" << i << "\" -> \"node" << (iter - this->node_collection_.begin()) << "\";" << std::endl;
+					out << "\"node"
+						<< i
+						<< "\" -> \"node"
+						<< (iter - this->node_collection_.begin())
+						<< "\";"
+						<< std::endl;
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 #include "parser.h"
 #include "exceptions.h"
 
+#include <stack>
 #include <sstream>
 
 namespace SimpleParser {
@@ -10,6 +11,13 @@ double calculate(std::string term) {
 	termTree.setRoot(buildTree(&termTree, term));
 
 	return termTree.solve();
+}
+
+std::string exportTree(std::string term) {
+	Tree termTree;
+	termTree.setRoot(buildTree(&termTree, term));
+
+	return termTree.print(term);
 }
 
 namespace {
