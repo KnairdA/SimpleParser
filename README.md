@@ -11,7 +11,7 @@ The implementation itself does not use any external libraries and relies fully o
 - Support for brackets
 - Export of the expression tree as [Graphviz](http://www.graphviz.org/) dot for visualization
 
-## Requirements
+## Requirements:
 
 - C++ compiler with support for new C++11 and STL features such as the auto keyword and unique_ptr (tested with GCC 4.7.2 on Linux)
 - [GoogleTest](http://code.google.com/p/googletest/) for tests
