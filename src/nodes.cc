@@ -7,9 +7,8 @@
 
 namespace SimpleParser {
 
-OperandNode::OperandNode(double val) {
-	this->value_ = val;
-}
+OperandNode::OperandNode(double val):
+	value_(val) { }
 
 double OperandNode::solve() {
 	return this->value_;
@@ -28,9 +27,8 @@ std::string OperandNode::print() {
 	return convertStream.str();
 }
 
-OperatorNode::OperatorNode(char op) {
-	this->function_ = op;
-}
+OperatorNode::OperatorNode(char op):
+	function_(op) { }
 
 double OperatorNode::solve() {
 	switch ( this->function_ ) {
@@ -54,7 +52,9 @@ double OperatorNode::solve() {
 			return this->leftChild->solve() - this->rightChild->solve();
 		}
 		case '^': {
-			return std::pow( this->leftChild->solve(), this->rightChild->solve() );
+			return std::pow(
+				this->leftChild->solve(), this->rightChild->solve()
+			);
 		}
 		default: {
 			throw operator_exception();
@@ -74,4 +74,4 @@ char OperatorNode::getFunction() {
 	return this->function_;
 }
 
-}  // SimpleParser
+}

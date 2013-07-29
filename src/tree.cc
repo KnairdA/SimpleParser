@@ -15,7 +15,9 @@ double Tree::solve() {
 }
 
 Node* Tree::addOperand(Node** place, double value) {
-	this->node_collection_.emplace_back(new OperandNode(value));
+	this->node_collection_.emplace_back(
+		new OperandNode(value)
+	);
 
 	if ( place != nullptr ) {
 		*place = this->node_collection_.back().get();
@@ -25,7 +27,9 @@ Node* Tree::addOperand(Node** place, double value) {
 }
 
 Node* Tree::addOperator(Node** place, char oper) {
-	this->node_collection_.emplace_back(new OperatorNode(oper));
+	this->node_collection_.emplace_back(
+		new OperatorNode(oper)
+	);
 
 	if ( place != nullptr ) {
 		*place = this->node_collection_.back().get();
@@ -47,7 +51,9 @@ std::string Tree::print(std::string term) {
 
 	int i = 0;
 
-	for ( auto it = this->node_collection_.begin(); it != this->node_collection_.end(); ++it ) {
+	for ( auto it = this->node_collection_.begin();
+	      it     != this->node_collection_.end();
+	      ++it ) {
 		out << "node"
 			<< i
 			<< " [ label = \""
@@ -56,7 +62,9 @@ std::string Tree::print(std::string term) {
 			<< std::endl;
 
 		if ( (*it)->getType() == OPERATOR_NODE ) {
-			for ( auto iter = this->node_collection_.begin(); iter != this->node_collection_.end(); ++iter ) {
+			for ( auto iter = this->node_collection_.begin();
+			      iter     != this->node_collection_.end();
+			      ++iter ) {
 				if ( (*iter).get() == (*it)->leftChild ) {
 					out << "\"node"
 						<< i
@@ -84,4 +92,4 @@ std::string Tree::print(std::string term) {
 	return out.str();
 }
 
-}  // SimpleParser
+}
