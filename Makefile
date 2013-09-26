@@ -1,4 +1,4 @@
-LIB_FILES  = src/nodes.cc src/tree.cc src/parser.cc
+LIB_FILES  = src/nodes.cc src/tree.cc src/utils.cc
 PROG_FILES = main.cc
 TEST_FILES = test.cc
 

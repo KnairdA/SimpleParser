@@ -8,13 +8,12 @@
 
 namespace SimpleParser {
 
-double calculate(std::string);
-std::string exportTree(std::string);
+double calculate(std::string term) {
+	return Tree(term).solve();
+}
 
-namespace {
-	int8_t getPriority(char);
-	std::vector<std::string> lexer(std::string);
-	Node* buildTree(Tree*, std::string);
+std::string exportTree(std::string term) {
+	return Tree(term).print();
 }
 
 }

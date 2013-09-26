@@ -11,17 +11,19 @@ namespace SimpleParser {
 
 class Tree {
 	public:
-		void setRoot(Node*);
+		Tree(std::string);
+
 		double solve();
-
-		Node* addOperand(Node**, double);
-		Node* addOperator(Node**, char);
-
-		std::string print(std::string);
+		std::string print();
 
 	private:
-		Node* root_node_;
+		Node* addOperand(Node**, double);
+		Node* addOperator(Node**, char);
+		Node* buildTree(std::string);
+
 		std::vector<std::unique_ptr<Node>> node_collection_;
+		Node* root_node_;
+		std::string term_;
 };
 
 }

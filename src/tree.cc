@@ -3,11 +3,15 @@
 
 #include <sstream>
 #include <limits>
+#include <stack>
+
+#include "utils.h"
 
 namespace SimpleParser {
 
-void Tree::setRoot(Node* root) {
-	this->root_node_ = root;
+Tree::Tree(std::string term):
+	term_(term) {
+	this->root_node_ = this->buildTree(term);
 }
 
 double Tree::solve() {
@@ -38,12 +42,12 @@ Node* Tree::addOperator(Node** place, char oper) {
 	return this->node_collection_.back().get();
 }
 
-std::string Tree::print(std::string term) {
+std::string Tree::print() {
 	std::stringstream out;
 	out.precision(std::numeric_limits<double>::digits10);
 
 	out << "digraph \""
-		<< term
+		<< this->term_
 		<< "\""
 		<< std::endl;
 	out << "{" << std::endl;
@@ -90,6 +94,87 @@ std::string Tree::print(std::string term) {
 	out << "}" << std::endl;
 	
 	return out.str();
+}
+
+Node* Tree::buildTree(std::string term) {
+	std::stack<Node*> operandStack;
+	std::stack<Node*> operatorStack;
+
+	std::vector<std::string> tmpLexer;
+	std::vector<std::string> lexerOutput = lexer(term);
+
+	int8_t priority;
+
+	for ( auto termIter = lexerOutput.begin();
+	      termIter     != lexerOutput.end();
+	      termIter++ ) {
+		std::string& currTerm = (*termIter);
+		priority              = getPriority(currTerm[0]);
+
+		if ( priority != -1 && (*termIter).size() == 1 ) {
+			if ( !operatorStack.empty() ) {
+				OperatorNode* lastNode(
+					static_cast<OperatorNode*>(operatorStack.top())
+				);
+
+				if ( getPriority(lastNode->getFunction()) < priority ) {
+					operatorStack.push( 
+						this->addOperator(nullptr, currTerm[0])
+					);
+				} else {
+					Node* currOperator = operatorStack.top();
+					operatorStack.pop();
+
+					currOperator->rightChild = operandStack.top();
+					operandStack.pop();
+
+					currOperator->leftChild  = operandStack.top();
+					operandStack.pop();
+
+					operandStack.push(currOperator);
+
+					termIter--;
+				}
+			} else {
+				operatorStack.push(
+					this->addOperator(nullptr, currTerm[0])
+				);
+			}
+		} else {
+			tmpLexer = lexer(*termIter);
+
+			if ( tmpLexer.size() == 1 ) {
+				double value;
+				std::istringstream convertStream(tmpLexer[0]);
+				convertStream >> value;
+
+				operandStack.push(
+					this->addOperand(nullptr,value)
+				);
+			} else if ( tmpLexer.size() > 1 ) {
+				operandStack.push(
+					buildTree(*termIter)
+				);
+			}
+		}
+	}
+
+	while ( !operatorStack.empty() ) {
+		OperatorNode *currOperator(
+			static_cast<OperatorNode*>(operatorStack.top())
+		);
+		operatorStack.pop();
+
+		currOperator->rightChild = operandStack.top();
+		operandStack.pop();
+
+		currOperator->leftChild  = operandStack.top();
+		operandStack.pop();
+
+		operandStack.push(currOperator);
+	}
+
+	return operandStack.top();
 }
 
 }
