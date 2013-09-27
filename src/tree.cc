@@ -18,30 +18,6 @@ double Tree::solve() {
 	return this->root_node_->solve();
 }
 
-Node* Tree::addOperand(Node** place, double value) {
-	this->node_collection_.emplace_back(
-		new OperandNode(value)
-	);
-
-	if ( place != nullptr ) {
-		*place = this->node_collection_.back().get();
-	}
-
-	return this->node_collection_.back().get();
-}
-
-Node* Tree::addOperator(Node** place, char oper) {
-	this->node_collection_.emplace_back(
-		new OperatorNode(oper)
-	);
-
-	if ( place != nullptr ) {
-		*place = this->node_collection_.back().get();
-	}
-
-	return this->node_collection_.back().get();
-}
-
 std::string Tree::print() {
 	std::stringstream out;
 	out.precision(std::numeric_limits<double>::digits10);
@@ -65,7 +41,7 @@ std::string Tree::print() {
 			<< "\"];"
 			<< std::endl;
 
-		if ( (*it)->getType() == OPERATOR_NODE ) {
+		if ( (*it)->getType() == NodeType::OPERATOR_NODE ) {
 			for ( auto iter = this->node_collection_.begin();
 			      iter     != this->node_collection_.end();
 			      ++iter ) {
@@ -94,6 +70,30 @@ std::string Tree::print() {
 	out << "}" << std::endl;
 	
 	return out.str();
+}
+
+Node* Tree::addOperand(Node** place, double value) {
+	this->node_collection_.emplace_back(
+		new OperandNode(value)
+	);
+
+	if ( place != nullptr ) {
+		*place = this->node_collection_.back().get();
+	}
+
+	return this->node_collection_.back().get();
+}
+
+Node* Tree::addOperator(Node** place, char oper) {
+	this->node_collection_.emplace_back(
+		new OperatorNode(oper)
+	);
+
+	if ( place != nullptr ) {
+		*place = this->node_collection_.back().get();
+	}
+
+	return this->node_collection_.back().get();
 }
 
 Node* Tree::buildTree(std::string term) {

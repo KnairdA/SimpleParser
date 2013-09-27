@@ -15,7 +15,7 @@ double OperandNode::solve() {
 }
 
 NodeType OperandNode::getType() {
-	return OPERAND_NODE;
+	return NodeType::OPERAND_NODE;
 }
 
 std::string OperandNode::print() {
@@ -63,7 +63,7 @@ double OperatorNode::solve() {
 }
 
 NodeType OperatorNode::getType() {
-	return OPERATOR_NODE;
+	return NodeType::OPERATOR_NODE;
 }
 
 std::string OperatorNode::print() {
