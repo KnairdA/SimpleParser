@@ -1,4 +1,5 @@
 #include "nodes.h"
+#include "utils.h"
 #include "exceptions.h"
 
 #include <cmath>
@@ -91,6 +92,21 @@ std::string OperatorNode::print() {
 
 TokenType OperatorNode::getToken() {
 	return this->operator_;
+}
+
+ConstantNode::ConstantNode(std::string identifier):
+	identifier_(identifier) { }
+
+double ConstantNode::solve() {
+
+}
+
+NodeType ConstantNode::getType() {
+	return NodeType::CONSTANT;
+}
+
+std::string ConstantNode::print() {
+	return this->identifier_;
 }
 
 }

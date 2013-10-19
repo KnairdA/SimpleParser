@@ -3,13 +3,14 @@
 
 #include <string>
 
-#include "utils.h"
-
 namespace SimpleParser {
+
+enum class TokenType : int8_t;
 
 enum class NodeType {
 	OPERAND,
 	OPERATOR,
+	CONSTANT,
 };
 
 class Node {
@@ -48,6 +49,18 @@ class OperandNode: public Node {
 
 	private:
 		double value_;
+};
+
+class ConstantNode: public Node {
+	public:
+		explicit ConstantNode(std::string);
+
+		virtual double solve();
+		virtual NodeType getType();
+		virtual std::string print();
+
+	private:
+		std::string identifier_;
 };
 
 }

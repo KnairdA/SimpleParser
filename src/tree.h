@@ -17,9 +17,8 @@ class Tree {
 		std::string print();
 
 	private:
-		Node* addOperand(Node**, double);
-		Node* addOperand(Node**, std::string);
-		Node* addOperator(Node**, TokenType);
+		template <class NType, typename... Args>
+		Node* addNode(Node**, Args&&... args);
 		Node* buildTree(std::string);
 
 		std::vector<std::unique_ptr<Node>> node_collection_;

@@ -9,6 +9,14 @@
 
 namespace SimpleParser {
 
+Node* topNodeFrom(const std::stack<Node*>& stack) {
+	if ( !stack.empty() ) {
+		return stack.top();
+	} else {
+		throw operator_exception();
+	}
+}
+
 Tree::Tree(std::string term):
 	term_(term) {
 	this->root_node_ = this->buildTree(term);
@@ -72,9 +80,10 @@ std::string Tree::print() {
 	return out.str();
 }
 
-Node* Tree::addOperand(Node** place, double value) {
+template <typename NType, typename... Args>
+Node* Tree::addNode(Node** place, Args&&... args) {
 	this->node_collection_.emplace_back(
-		new OperandNode(value)
+		new NType(std::forward<Args>(args)...)
 	);
 
 	if ( place != nullptr ) {
@@ -82,38 +91,6 @@ Node* Tree::addOperand(Node** place, double value) {
 	}
 
 	return this->node_collection_.back().get();
-}
-
-Node* Tree::addOperand(Node** place, std::string value) {
-	this->node_collection_.emplace_back(
-		new OperandNode(value)
-	);
-
-	if ( place != nullptr ) {
-		*place = this->node_collection_.back().get();
-	}
-
-	return this->node_collection_.back().get();
-}
-
-Node* Tree::addOperator(Node** place, TokenType token) {
-	this->node_collection_.emplace_back(
-		new OperatorNode(token)
-	);
-
-	if ( place != nullptr ) {
-		*place = this->node_collection_.back().get();
-	}
-
-	return this->node_collection_.back().get();
-}
-
-Node* topNodeFrom(const std::stack<Node*>& stack) {
-	if ( !stack.empty() ) {
-		return stack.top();
-	} else {
-		throw operator_exception();
-	}
 }
 
 Node* Tree::buildTree(std::string term) {
@@ -139,7 +116,7 @@ Node* Tree::buildTree(std::string term) {
 
 				if ( token > lastNode->getToken() ) {
 					operatorStack.push( 
-						this->addOperator(nullptr, token)
+						this->addNode<OperatorNode>(nullptr, token)
 					);
 				} else {
 					Node* currOperator = topNodeFrom(operatorStack);
@@ -157,7 +134,7 @@ Node* Tree::buildTree(std::string term) {
 				}
 			} else {
 				operatorStack.push(
-					this->addOperator(nullptr, token)
+					this->addNode<OperatorNode>(nullptr, token)
 				);
 			}
 		} else {
@@ -171,14 +148,14 @@ Node* Tree::buildTree(std::string term) {
 						convertStream >> value;
 
 						operandStack.push(
-							this->addOperand(nullptr,value)
+							this->addNode<OperandNode>(nullptr, value)
 						);
 
 						break;
 					}
 					case TokenType::VALUE_IDENTIFIER: {
 						operandStack.push(
-							this->addOperand(nullptr,tmpLexer[0])
+							this->addNode<ConstantNode>(nullptr, tmpLexer[0])
 						);
 
 						break;
