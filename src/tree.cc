@@ -96,6 +96,14 @@ Node* Tree::addOperator(Node** place, char oper) {
 	return this->node_collection_.back().get();
 }
 
+Node* topNodeFrom(const std::stack<Node*>& stack) {
+	if ( !stack.empty() ) {
+		return stack.top();
+	} else {
+		throw operator_exception();
+	}
+}
+
 Node* Tree::buildTree(std::string term) {
 	std::stack<Node*> operandStack;
 	std::stack<Node*> operatorStack;
@@ -114,7 +122,7 @@ Node* Tree::buildTree(std::string term) {
 		if ( priority != -1 && (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
 				OperatorNode* lastNode(
-					static_cast<OperatorNode*>(operatorStack.top())
+					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 				);
 
 				if ( getPriority(lastNode->getFunction()) < priority ) {
@@ -122,13 +130,13 @@ Node* Tree::buildTree(std::string term) {
 						this->addOperator(nullptr, currTerm[0])
 					);
 				} else {
-					Node* currOperator = operatorStack.top();
+					Node* currOperator = topNodeFrom(operatorStack);
 					operatorStack.pop();
 
-					currOperator->rightChild = operandStack.top();
+					currOperator->rightChild = topNodeFrom(operandStack);
 					operandStack.pop();
 
-					currOperator->leftChild  = operandStack.top();
+					currOperator->leftChild  = topNodeFrom(operandStack);
 					operandStack.pop();
 
 					operandStack.push(currOperator);
@@ -161,20 +169,20 @@ Node* Tree::buildTree(std::string term) {
 
 	while ( !operatorStack.empty() ) {
 		OperatorNode *currOperator(
-			static_cast<OperatorNode*>(operatorStack.top())
+			static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 		);
 		operatorStack.pop();
 
-		currOperator->rightChild = operandStack.top();
+		currOperator->rightChild = topNodeFrom(operandStack);
 		operandStack.pop();
 
-		currOperator->leftChild  = operandStack.top();
+		currOperator->leftChild  = topNodeFrom(operandStack);
 		operandStack.pop();
 
 		operandStack.push(currOperator);
 	}
 
-	return operandStack.top();
+	return topNodeFrom(operandStack);
 }
 
 }

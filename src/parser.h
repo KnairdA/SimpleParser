@@ -6,7 +6,7 @@
 namespace SimpleParser {
 
 double calculate(std::string);
-std::string exportTree(std::string);
+std::string print(std::string);
 
 }
 
