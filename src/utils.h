@@ -8,19 +8,28 @@
 
 namespace SimpleParser {
 
-enum class TokenType : int8_t {
-	OPERATOR_PLUS     = 10,
-	OPERATOR_MINUS    = 11,
-	OPERATOR_DIVIDE   = 20,
-	OPERATOR_MULTIPLY = 21,
-	OPERATOR_POWER    = 30,
-	PARENTHESES_OPEN  = 90,
-	PARENTHESES_CLOSE = 91,
-	VALUE_NUMBER      = -1,
-	VALUE_IDENTIFIER  = -2,
+enum class PrecedenceLevel : uint8_t {
+	FIRST  = 1,
+	SECOND = 2,
+	THIRD  = 3,
+	FOURTH = 4,
+	FIFTH  = 5,
+};
+
+enum class TokenType {
+	OPERATOR_PLUS,
+	OPERATOR_MINUS,
+	OPERATOR_DIVIDE,
+	OPERATOR_MULTIPLY,
+	OPERATOR_POWER,
+	PARENTHESES_OPEN,
+	PARENTHESES_CLOSE,
+	VALUE_NUMBER,
+	VALUE_IDENTIFIER,
 };
 
 TokenType getTokenType(char);
+PrecedenceLevel getPrecedence(TokenType);
 std::vector<std::string> lexer(std::string);
 
 }

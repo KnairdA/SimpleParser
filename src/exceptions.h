@@ -24,6 +24,13 @@ class divide_exception: public std::exception {
 	}
 };
 
+class identifier_exception: public std::exception {
+	virtual const char* what() const throw()
+	{
+		return "Identifier could not be correctly resolved.";
+	}
+};
+
 }
 
 #endif  // PARSER_SRC_EXCEPTIONS_H_

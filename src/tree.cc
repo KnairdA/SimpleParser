@@ -18,7 +18,14 @@ Node* topNodeFrom(const std::stack<Node*>& stack) {
 }
 
 Tree::Tree(std::string term):
-	term_(term) {
+	term_(term),
+	constants_(nullptr) {
+	this->root_node_ = this->buildTree(term);
+}
+
+Tree::Tree(std::string term, const ConstantMap* constants):
+	term_(term),
+	constants_(constants) {
 	this->root_node_ = this->buildTree(term);
 }
 
@@ -114,7 +121,7 @@ Node* Tree::buildTree(std::string term) {
 					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 				);
 
-				if ( token > lastNode->getToken() ) {
+				if ( getPrecedence(token) > getPrecedence(lastNode->getToken()) ) {
 					operatorStack.push( 
 						this->addNode<OperatorNode>(nullptr, token)
 					);
@@ -142,7 +149,8 @@ Node* Tree::buildTree(std::string term) {
 
 			if ( tmpLexer.size() == 1 ) {
 				switch ( getTokenType(tmpLexer[0][0]) ) {
-					case TokenType::VALUE_NUMBER: {
+					case TokenType::VALUE_NUMBER:
+					case TokenType::OPERATOR_MINUS: {
 						double value;
 						std::istringstream convertStream(tmpLexer[0]);
 						convertStream >> value;
@@ -155,7 +163,9 @@ Node* Tree::buildTree(std::string term) {
 					}
 					case TokenType::VALUE_IDENTIFIER: {
 						operandStack.push(
-							this->addNode<ConstantNode>(nullptr, tmpLexer[0])
+							this->addNode<ConstantNode>(nullptr,
+							                            tmpLexer[0],
+							                            this->constants_)
 						);
 
 						break;

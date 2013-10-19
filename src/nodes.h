@@ -1,11 +1,13 @@
 #ifndef PARSER_SRC_NODES_H_
 #define PARSER_SRC_NODES_H_
 
+#include <map>
 #include <string>
 
 namespace SimpleParser {
 
-enum class TokenType : int8_t;
+enum class TokenType;
+typedef std::map<std::string, double> ConstantMap;
 
 enum class NodeType {
 	OPERAND,
@@ -53,7 +55,7 @@ class OperandNode: public Node {
 
 class ConstantNode: public Node {
 	public:
-		explicit ConstantNode(std::string);
+		explicit ConstantNode(std::string, const ConstantMap*);
 
 		virtual double solve();
 		virtual NodeType getType();
@@ -61,6 +63,7 @@ class ConstantNode: public Node {
 
 	private:
 		std::string identifier_;
+		const ConstantMap* constants_;
 };
 
 }

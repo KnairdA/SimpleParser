@@ -12,9 +12,9 @@ TokenType getTokenType(char tmp) {
 	} else {
 		switch ( tmp ) {
 			case '-':
-				return TokenType::OPERATOR_PLUS;
-			case '+':
 				return TokenType::OPERATOR_MINUS;
+			case '+':
+				return TokenType::OPERATOR_PLUS;
 			case '/':
 				return TokenType::OPERATOR_DIVIDE;
 			case '*':
@@ -29,6 +29,33 @@ TokenType getTokenType(char tmp) {
 				return TokenType::VALUE_NUMBER;
 			default:
 				return TokenType::VALUE_NUMBER;
+		}
+	}
+}
+
+PrecedenceLevel getPrecedence(TokenType token) {
+	switch ( token ) {
+		case TokenType::VALUE_NUMBER:
+		case TokenType::VALUE_IDENTIFIER: {
+			return PrecedenceLevel::FIRST;
+		}
+		case TokenType::OPERATOR_MINUS:
+		case TokenType::OPERATOR_PLUS: {
+			return PrecedenceLevel::SECOND;
+		}
+		case TokenType::OPERATOR_DIVIDE:
+		case TokenType::OPERATOR_MULTIPLY: {
+			return PrecedenceLevel::THIRD;
+		}
+		case TokenType::OPERATOR_POWER: {
+			return PrecedenceLevel::FOURTH;
+		}
+		case TokenType::PARENTHESES_OPEN:
+		case TokenType::PARENTHESES_CLOSE: {
+			return PrecedenceLevel::FIFTH;
+		}
+		default: {
+			return PrecedenceLevel::FIRST;
 		}
 	}
 }
@@ -55,7 +82,8 @@ std::vector<std::string> lexer(std::string term) {
 			if ( level > 0 ) {
 				tmp += *termIter;
 			} else {
-				if ( token == TokenType::VALUE_NUMBER ) {
+				if ( token == TokenType::VALUE_NUMBER ||
+				     token == TokenType::OPERATOR_MINUS ) {
 					tmpNumber += *termIter;
 				} else if ( token == TokenType::VALUE_IDENTIFIER ) {
 					tmpIdentifier += *termIter;

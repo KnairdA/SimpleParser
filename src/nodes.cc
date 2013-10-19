@@ -1,5 +1,6 @@
 #include "nodes.h"
 #include "utils.h"
+#include "tree.h"
 #include "exceptions.h"
 
 #include <cmath>
@@ -94,11 +95,22 @@ TokenType OperatorNode::getToken() {
 	return this->operator_;
 }
 
-ConstantNode::ConstantNode(std::string identifier):
-	identifier_(identifier) { }
+ConstantNode::ConstantNode(std::string identifier,
+                           const ConstantMap* constants):
+	identifier_(identifier),
+	constants_(constants) { }
 
 double ConstantNode::solve() {
-
+	if ( this->constants_ != nullptr ) {
+		try {
+			return this->constants_->at(this->identifier_);
+		}
+		catch ( std::out_of_range &e ) {
+			throw identifier_exception();
+		}
+	} else {
+		throw identifier_exception();
+	}
 }
 
 NodeType ConstantNode::getType() {

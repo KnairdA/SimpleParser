@@ -3,10 +3,15 @@
 
 #include <string>
 
+#include "tree.h"
+
 namespace SimpleParser {
 
 double calculate(std::string);
+double calculate(std::string, const ConstantMap*);
+
 std::string print(std::string);
+std::string print(std::string, const ConstantMap*);
 
 }
 
