@@ -3,22 +3,19 @@
 
 #include "src/parser.h"
 
-int main()
-{
-	std::string inputTerm;
-	
-	std::cin >> inputTerm;
-	
-	try {
-		typedef std::numeric_limits<double> dbl;
-		std::cout.precision(dbl::digits10);
+typedef std::numeric_limits<double> dbl;
 
-		std::cout << SimpleParser::calculate(inputTerm) << std::endl;
-	}
-	catch ( std::exception &e )
-	{
-		std::cerr << e.what() << std::endl;
-		return 1;
+int main() {
+	std::string inputTerm;
+	std::cout.precision(dbl::digits10);
+	
+	while ( std::cin >> inputTerm ) {
+		try {
+			std::cout << SimpleParser::calculate(inputTerm) << std::endl;
+		}
+		catch ( std::exception &e ) {
+			std::cerr << e.what() << std::endl;
+		}
 	}
 
 	return 0;
