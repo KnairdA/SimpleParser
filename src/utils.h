@@ -17,6 +17,7 @@ enum class TokenType : int8_t {
 	PARENTHESES_OPEN  = 90,
 	PARENTHESES_CLOSE = 91,
 	VALUE_NUMBER      = -1,
+	VALUE_IDENTIFIER  = -2,
 };
 
 TokenType getTokenType(char);

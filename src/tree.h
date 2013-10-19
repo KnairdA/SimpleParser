@@ -19,7 +19,7 @@ class Tree {
 	private:
 		Node* addOperand(Node**, double);
 		Node* addOperand(Node**, std::string);
-		Node* addOperator(Node**, char);
+		Node* addOperator(Node**, TokenType);
 		Node* buildTree(std::string);
 
 		std::vector<std::unique_ptr<Node>> node_collection_;

@@ -3,11 +3,13 @@
 
 #include <string>
 
+#include "utils.h"
+
 namespace SimpleParser {
 
-enum NodeType {
-	OPERAND_NODE,
-	OPERATOR_NODE,
+enum class NodeType {
+	OPERAND,
+	OPERATOR,
 };
 
 class Node {
@@ -24,22 +26,21 @@ class Node {
 
 class OperatorNode: public Node {
 	public:
-		explicit OperatorNode(char);
+		explicit OperatorNode(TokenType);
 
 		virtual double solve();
 		virtual NodeType getType();
 		virtual std::string print();
 
-		char getFunction();
+		TokenType getToken();
 
 	private:
-		char function_;
+		TokenType operator_;
 };
 
 class OperandNode: public Node {
 	public:
 		explicit OperandNode(double);
-		explicit OperandNode(std::string);
 
 		virtual double solve();
 		virtual NodeType getType();

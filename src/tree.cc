@@ -41,7 +41,7 @@ std::string Tree::print() {
 			<< "\"];"
 			<< std::endl;
 
-		if ( (*it)->getType() == NodeType::OPERATOR_NODE ) {
+		if ( (*it)->getType() == NodeType::OPERATOR ) {
 			for ( auto iter = this->node_collection_.begin();
 			      iter     != this->node_collection_.end();
 			      ++iter ) {
@@ -96,9 +96,9 @@ Node* Tree::addOperand(Node** place, std::string value) {
 	return this->node_collection_.back().get();
 }
 
-Node* Tree::addOperator(Node** place, char oper) {
+Node* Tree::addOperator(Node** place, TokenType token) {
 	this->node_collection_.emplace_back(
-		new OperatorNode(oper)
+		new OperatorNode(token)
 	);
 
 	if ( place != nullptr ) {
@@ -137,9 +137,9 @@ Node* Tree::buildTree(std::string term) {
 					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 				);
 
-				if ( token > getTokenType(lastNode->getFunction()) ) {
+				if ( token > lastNode->getToken() ) {
 					operatorStack.push( 
-						this->addOperator(nullptr, currTerm[0])
+						this->addOperator(nullptr, token)
 					);
 				} else {
 					Node* currOperator = topNodeFrom(operatorStack);
@@ -157,7 +157,7 @@ Node* Tree::buildTree(std::string term) {
 				}
 			} else {
 				operatorStack.push(
-					this->addOperator(nullptr, currTerm[0])
+					this->addOperator(nullptr, token)
 				);
 			}
 		} else {

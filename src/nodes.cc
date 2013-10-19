@@ -7,18 +7,15 @@
 
 namespace SimpleParser {
 
-OperandNode::OperandNode(double val):
-	value_(val) { }
-
-OperandNode::OperandNode(std::string identifier):
-	value_(42) { }
+OperandNode::OperandNode(double value):
+	value_(value) { }
 
 double OperandNode::solve() {
 	return this->value_;
 }
 
 NodeType OperandNode::getType() {
-	return NodeType::OPERAND_NODE;
+	return NodeType::OPERAND;
 }
 
 std::string OperandNode::print() {
@@ -30,15 +27,26 @@ std::string OperandNode::print() {
 	return convertStream.str();
 }
 
-OperatorNode::OperatorNode(char op):
-	function_(op) { }
+OperatorNode::OperatorNode(TokenType token):
+	operator_(token) { }
 
 double OperatorNode::solve() {
-	switch ( this->function_ ) {
-		case '*': {
+	switch ( this->operator_ ) {
+		case TokenType::OPERATOR_MULTIPLY: {
 			return this->leftChild->solve() * this->rightChild->solve();
 		}
-		case '/': {
+		case TokenType::OPERATOR_PLUS: {
+			return this->leftChild->solve() + this->rightChild->solve();
+		}
+		case TokenType::OPERATOR_MINUS: {
+			return this->leftChild->solve() - this->rightChild->solve();
+		}
+		case TokenType::OPERATOR_POWER: {
+			return std::pow(
+				this->leftChild->solve(), this->rightChild->solve()
+			);
+		}
+		case TokenType::OPERATOR_DIVIDE: {
 			double rightChild = this->rightChild->solve();
 			
 			if ( rightChild != 0 ) {
@@ -48,17 +56,6 @@ double OperatorNode::solve() {
 				throw divide_exception();
 			}
 		}
-		case '+': {
-			return this->leftChild->solve() + this->rightChild->solve();
-		}
-		case '-': {
-			return this->leftChild->solve() - this->rightChild->solve();
-		}
-		case '^': {
-			return std::pow(
-				this->leftChild->solve(), this->rightChild->solve()
-			);
-		}
 		default: {
 			throw operator_exception();
 		}
@@ -66,15 +63,34 @@ double OperatorNode::solve() {
 }
 
 NodeType OperatorNode::getType() {
-	return NodeType::OPERATOR_NODE;
+	return NodeType::OPERATOR;
 }
 
 std::string OperatorNode::print() {
-	return std::string(1, this->function_);
+	switch ( this->operator_ ) {
+		case TokenType::OPERATOR_PLUS: {
+			return std::string(1, '+');
+		}
+		case TokenType::OPERATOR_MINUS: {
+			return std::string(1, '-');
+		}
+		case TokenType::OPERATOR_MULTIPLY: {
+			return std::string(1, '*');
+		}
+		case TokenType::OPERATOR_DIVIDE: {
+			return std::string(1, '/');
+		}
+		case TokenType::OPERATOR_POWER: {
+			return std::string(1, '^');
+		}
+		default: {
+			throw operator_exception();
+		}
+	}
 }
 
-char OperatorNode::getFunction() {
-	return this->function_;
+TokenType OperatorNode::getToken() {
+	return this->operator_;
 }
 
 }
