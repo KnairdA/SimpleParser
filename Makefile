@@ -23,11 +23,11 @@ $(BIN_DIR)/libSimpleParser.so: $(LIB_OBJ)
 	$(CXX) -shared -o $(BIN_DIR)/libSimpleParser.so $(LIB_OBJ) $(CXXFLAGS)
 
 $(BIN_DIR)/test: $(BIN_DIR)/libSimpleParser.so
-	$(CXX) -o $(BIN_DIR)/test $(TEST_SRC) -lgtest -L$(BIN_DIR)/ -lSimpleParser
+	$(CXX) -o $(BIN_DIR)/test $(TEST_SRC) -lgtest -L$(BIN_DIR)/ -lSimpleParser -std=c++11
 	./$(BIN_DIR)/test
 
 $(BIN_DIR)/clc: $(BIN_DIR)/libSimpleParser.so
-	$(CXX) -o $(BIN_DIR)/clc $(CLC_SRC) -L$(BIN_DIR)/ -lSimpleParser
+	$(CXX) -o $(BIN_DIR)/clc $(CLC_SRC) -L$(BIN_DIR)/ -lSimpleParser -std=c++11
 
 install: $(BIN_DIR)/libSimpleParser.so $(BIN_DIR)/clc 
 	install -m 0755 $(BIN_DIR)/libSimpleParser.so /usr/lib
