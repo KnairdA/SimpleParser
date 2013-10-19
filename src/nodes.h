@@ -39,6 +39,7 @@ class OperatorNode: public Node {
 class OperandNode: public Node {
 	public:
 		explicit OperandNode(double);
+		explicit OperandNode(std::string);
 
 		virtual double solve();
 		virtual NodeType getType();

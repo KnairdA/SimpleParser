@@ -84,6 +84,18 @@ Node* Tree::addOperand(Node** place, double value) {
 	return this->node_collection_.back().get();
 }
 
+Node* Tree::addOperand(Node** place, std::string value) {
+	this->node_collection_.emplace_back(
+		new OperandNode(value)
+	);
+
+	if ( place != nullptr ) {
+		*place = this->node_collection_.back().get();
+	}
+
+	return this->node_collection_.back().get();
+}
+
 Node* Tree::addOperator(Node** place, char oper) {
 	this->node_collection_.emplace_back(
 		new OperatorNode(oper)
@@ -119,7 +131,7 @@ Node* Tree::buildTree(std::string term) {
 		std::string& currTerm = (*termIter);
 		priority              = getPriority(currTerm[0]);
 
-		if ( priority != -1 && (*termIter).size() == 1 ) {
+		if ( priority != -1 && priority != 100 && (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
 				OperatorNode* lastNode(
 					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
@@ -152,13 +164,19 @@ Node* Tree::buildTree(std::string term) {
 			tmpLexer = lexer(*termIter);
 
 			if ( tmpLexer.size() == 1 ) {
-				double value;
-				std::istringstream convertStream(tmpLexer[0]);
-				convertStream >> value;
+				if ( getPriority(tmpLexer[0][0]) == -1 ) {
+					double value;
+					std::istringstream convertStream(tmpLexer[0]);
+					convertStream >> value;
 
-				operandStack.push(
-					this->addOperand(nullptr,value)
-				);
+					operandStack.push(
+						this->addOperand(nullptr,value)
+					);
+				} else if ( getPriority(tmpLexer[0][0]) == 100 ) {
+					operandStack.push(
+						this->addOperand(nullptr,tmpLexer[0])
+					);
+				}
 			} else if ( tmpLexer.size() > 1 ) {
 				operandStack.push(
 					buildTree(*termIter)

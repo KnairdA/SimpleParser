@@ -10,6 +10,9 @@ namespace SimpleParser {
 OperandNode::OperandNode(double val):
 	value_(val) { }
 
+OperandNode::OperandNode(std::string identifier):
+	value_(42) { }
+
 double OperandNode::solve() {
 	return this->value_;
 }

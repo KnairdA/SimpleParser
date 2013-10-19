@@ -1,36 +1,42 @@
 #include "utils.h"
+#include "tree.h"
 #include "exceptions.h"
 
-#include "tree.h"
+#include <cctype>
 
 namespace SimpleParser {
 
 int8_t getPriority(char tmp) {
-	switch ( tmp ) {
-		case '-':
-			return 10;
-		case '+':
-			return 10;
-		case '/':
-			return 20;
-		case '*':
-			return 20;
-		case '^':
-			return 30;
-		case '(':
-			return 90;
-		case ')':
-			return 90;
-		case ',':
-			return -1;
-		default:
-			return -1;
+	if ( std::isalpha(tmp) ) {
+		return 100;
+	} else {
+		switch ( tmp ) {
+			case '-':
+				return 10;
+			case '+':
+				return 10;
+			case '/':
+				return 20;
+			case '*':
+				return 20;
+			case '^':
+				return 30;
+			case '(':
+				return 90;
+			case ')':
+				return 90;
+			case ',':
+				return -1;
+			default:
+				return -1;
+		}
 	}
 }
 
 std::vector<std::string> lexer(std::string term) {
 	std::string tmp;
-	std::string tmpNum;
+	std::string tmpNumber;
+	std::string tmpIdentifier;
 	std::vector<std::string> output;
 
 	int8_t   priority     = 0;
@@ -42,17 +48,26 @@ std::vector<std::string> lexer(std::string term) {
 	      termIter++ ) {
 		priority = getPriority(*termIter);
 
-		if ( priority == -1 || ( termIter == term.begin() &&
-		                         priority == 10 ) ) {
+		if ( priority == -1 || priority == 100 || ( termIter == term.begin() &&
+		                                            priority == 10 ) ) {
 			if ( level > 0 ) {
 				tmp += *termIter;
 			} else {
-				tmpNum += *termIter;
+				if ( priority == -1 ) {
+					tmpNumber += *termIter;
+				} else if ( priority == 100 ) {
+					tmpIdentifier += *termIter;
+				}
 			}
 		} else {
-			if ( lastPriority == -1 && level == 0 ) {
-				output.push_back(tmpNum);
-				tmpNum.clear();
+			if ( level == 0 ) {
+				if ( lastPriority == -1 ) {
+					output.push_back(tmpNumber);
+					tmpNumber.clear();
+				} else if ( lastPriority == 100 ) {
+					output.push_back(tmpIdentifier);
+					tmpIdentifier.clear();
+				}
 			}
 
 			switch ( *termIter ) {
@@ -96,12 +111,14 @@ std::vector<std::string> lexer(std::string term) {
 	}
 
 	if ( lastPriority == -1 ) {
-		output.push_back(tmpNum);
+		output.push_back(tmpNumber);
+	} else if ( lastPriority == 100 ) {
+		output.push_back(tmpIdentifier);
 	} else if ( lastPriority != 90 ) {
 		throw operator_exception();
 	}
 
-	if (level != 0) {
+	if ( level != 0 ) {
 		throw parenthese_exception();
 	}
 

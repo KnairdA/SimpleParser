@@ -18,6 +18,7 @@ class Tree {
 
 	private:
 		Node* addOperand(Node**, double);
+		Node* addOperand(Node**, std::string);
 		Node* addOperator(Node**, char);
 		Node* buildTree(std::string);
 
