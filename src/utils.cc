@@ -5,26 +5,26 @@
 
 namespace SimpleParser {
 
-int8_t getPriority(char tmp) {
+TokenType getTokenType(char tmp) {
 	switch ( tmp ) {
 		case '-':
-			return 10;
+			return TokenType::OPERATOR_PLUS;
 		case '+':
-			return 10;
+			return TokenType::OPERATOR_MINUS;
 		case '/':
-			return 20;
+			return TokenType::OPERATOR_DIVIDE;
 		case '*':
-			return 20;
+			return TokenType::OPERATOR_MULTIPLY;
 		case '^':
-			return 30;
+			return TokenType::OPERATOR_POWER;
 		case '(':
-			return 90;
+			return TokenType::PARENTHESES_OPEN;
 		case ')':
-			return 90;
+			return TokenType::PARENTHESES_CLOSE;
 		case ',':
-			return -1;
+			return TokenType::VALUE_NUMBER;
 		default:
-			return -1;
+			return TokenType::VALUE_NUMBER;
 	}
 }
 
@@ -32,31 +32,33 @@ std::vector<std::string> lexer(std::string term) {
 	std::string tmp;
 	std::string tmpNum;
 	std::vector<std::string> output;
+	TokenType token;
+	TokenType lastToken;
 
-	int8_t   priority     = 0;
-	int8_t   lastPriority = 0;
-	uint32_t level        = 0;
+	uint32_t level = 0;
 
 	for ( auto termIter = term.begin();
 	      termIter     != term.end();
 	      termIter++ ) {
-		priority = getPriority(*termIter);
+		token = getTokenType(*termIter);
 
-		if ( priority == -1 || ( termIter == term.begin() &&
-		                         priority == 10 ) ) {
+		if ( token    == TokenType::VALUE_NUMBER   ||
+		   ( token    == TokenType::OPERATOR_MINUS &&
+		     termIter == term.begin() ) ) {
 			if ( level > 0 ) {
 				tmp += *termIter;
 			} else {
 				tmpNum += *termIter;
 			}
 		} else {
-			if ( lastPriority == -1 && level == 0 ) {
+			if ( lastToken == TokenType::VALUE_NUMBER &&
+			     level     == 0 ) {
 				output.push_back(tmpNum);
 				tmpNum.clear();
 			}
 
-			switch ( *termIter ) {
-				case '(': {
+			switch ( token ) {
+				case TokenType::PARENTHESES_OPEN: {
 					if ( level > 0 ) {
 						tmp += *termIter;
 					}
@@ -65,7 +67,7 @@ std::vector<std::string> lexer(std::string term) {
 
 					break;
 				}
-				case ')': {
+				case TokenType::PARENTHESES_CLOSE: {
 					level--;
 
 					if ( level == 0 ) {
@@ -92,20 +94,21 @@ std::vector<std::string> lexer(std::string term) {
 			}
 		}
 
-		lastPriority = priority;
+		lastToken = token;
 	}
 
-	if ( lastPriority == -1 ) {
+	if ( lastToken == TokenType::VALUE_NUMBER ) {
 		output.push_back(tmpNum);
-	} else if ( lastPriority != 90 ) {
+	} else if ( lastToken != TokenType::PARENTHESES_CLOSE ) {
 		throw operator_exception();
 	}
 
-	if (level != 0) {
+	if ( level != 0 ) {
 		throw parenthese_exception();
 	}
 
-	if ( lastPriority == 90 && output.size() == 1 ) {
+	if ( lastToken     == TokenType::PARENTHESES_CLOSE &&
+	     output.size() == 1 ) {
 		output = lexer(output[0]);
 	}
 

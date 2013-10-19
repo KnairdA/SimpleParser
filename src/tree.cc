@@ -111,21 +111,19 @@ Node* Tree::buildTree(std::string term) {
 	std::vector<std::string> tmpLexer;
 	std::vector<std::string> lexerOutput = lexer(term);
 
-	int8_t priority;
-
 	for ( auto termIter = lexerOutput.begin();
 	      termIter     != lexerOutput.end();
 	      termIter++ ) {
-		std::string& currTerm = (*termIter);
-		priority              = getPriority(currTerm[0]);
+		const std::string& currTerm = (*termIter);
+		const TokenType token       = getTokenType(currTerm[0]);
 
-		if ( priority != -1 && (*termIter).size() == 1 ) {
+		if ( token != TokenType::VALUE_NUMBER && (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
 				OperatorNode* lastNode(
 					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 				);
 
-				if ( getPriority(lastNode->getFunction()) < priority ) {
+				if ( token > getTokenType(lastNode->getFunction()) ) {
 					operatorStack.push( 
 						this->addOperator(nullptr, currTerm[0])
 					);
