@@ -123,21 +123,21 @@ Node* Tree::buildTree(std::string term) {
 	std::vector<std::string> tmpLexer;
 	std::vector<std::string> lexerOutput = lexer(term);
 
-	int8_t priority;
-
 	for ( auto termIter = lexerOutput.begin();
 	      termIter     != lexerOutput.end();
 	      termIter++ ) {
-		std::string& currTerm = (*termIter);
-		priority              = getPriority(currTerm[0]);
+		const std::string& currTerm = (*termIter);
+		const TokenType token       = getTokenType(currTerm[0]);
 
-		if ( priority != -1 && priority != 100 && (*termIter).size() == 1 ) {
+		if ( token              != TokenType::VALUE_NUMBER     && 
+		     token              != TokenType::VALUE_IDENTIFIER &&
+		     (*termIter).size() == 1 ) {
 			if ( !operatorStack.empty() ) {
 				OperatorNode* lastNode(
 					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
 				);
 
-				if ( getPriority(lastNode->getFunction()) < priority ) {
+				if ( token > getTokenType(lastNode->getFunction()) ) {
 					operatorStack.push( 
 						this->addOperator(nullptr, currTerm[0])
 					);
@@ -164,20 +164,30 @@ Node* Tree::buildTree(std::string term) {
 			tmpLexer = lexer(*termIter);
 
 			if ( tmpLexer.size() == 1 ) {
-				if ( getPriority(tmpLexer[0][0]) == -1 ) {
-					double value;
-					std::istringstream convertStream(tmpLexer[0]);
-					convertStream >> value;
+				switch ( getTokenType(tmpLexer[0][0]) ) {
+					case TokenType::VALUE_NUMBER: {
+						double value;
+						std::istringstream convertStream(tmpLexer[0]);
+						convertStream >> value;
 
-					operandStack.push(
-						this->addOperand(nullptr,value)
-					);
-				} else if ( getPriority(tmpLexer[0][0]) == 100 ) {
-					operandStack.push(
-						this->addOperand(nullptr,tmpLexer[0])
-					);
+						operandStack.push(
+							this->addOperand(nullptr,value)
+						);
+
+						break;
+					}
+					case TokenType::VALUE_IDENTIFIER: {
+						operandStack.push(
+							this->addOperand(nullptr,tmpLexer[0])
+						);
+
+						break;
+					}
+					default: {
+						throw operator_exception();
+					}
 				}
-			} else if ( tmpLexer.size() > 1 ) {
+			} else {
 				operandStack.push(
 					buildTree(*termIter)
 				);
