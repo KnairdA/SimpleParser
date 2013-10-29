@@ -13,7 +13,7 @@ typedef std::vector<std::unique_ptr<Node>> NodeCollection;
 
 class Tree {
 	public:
-		Tree(std::string);
+		explicit Tree(std::string);
 		Tree(std::string, const ConstantMap*);
 
 		double solve();
