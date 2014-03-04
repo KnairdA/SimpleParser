@@ -16,7 +16,7 @@ double OperandNode::solve() {
 	return this->value_;
 }
 
-NodeType OperandNode::getType() {
+NodeType OperandNode::type() {
 	return NodeType::OPERAND;
 }
 
@@ -64,7 +64,7 @@ double OperatorNode::solve() {
 	}
 }
 
-NodeType OperatorNode::getType() {
+NodeType OperatorNode::type() {
 	return NodeType::OPERATOR;
 }
 
@@ -91,7 +91,7 @@ std::string OperatorNode::print() {
 	}
 }
 
-TokenType OperatorNode::getToken() {
+TokenType OperatorNode::token() {
 	return this->operator_;
 }
 
@@ -113,7 +113,7 @@ double ConstantNode::solve() {
 	}
 }
 
-NodeType ConstantNode::getType() {
+NodeType ConstantNode::type() {
 	return NodeType::CONSTANT;
 }
 

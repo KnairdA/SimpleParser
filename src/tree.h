@@ -9,8 +9,6 @@
 
 namespace SimpleParser {
 
-typedef std::vector<std::unique_ptr<Node>> NodeCollection;
-
 class Tree {
 	public:
 		explicit Tree(std::string);
@@ -26,7 +24,7 @@ class Tree {
 
 		std::string term_;
 		Node* root_node_;
-		NodeCollection node_collection_;
+		std::vector<std::unique_ptr<Node>> node_collection_;
 		const ConstantMap* constants_;
 };
 

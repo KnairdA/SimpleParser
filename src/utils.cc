@@ -3,10 +3,11 @@
 #include "exceptions.h"
 
 #include <cctype>
+#include <sstream>
 
 namespace SimpleParser {
 
-TokenType getTokenType(char tmp) {
+TokenType determineToken(char tmp) {
 	if ( std::isalpha(tmp) ) {
 		return TokenType::VALUE_IDENTIFIER;
 	} else {
@@ -33,7 +34,7 @@ TokenType getTokenType(char tmp) {
 	}
 }
 
-PrecedenceLevel getPrecedence(TokenType token) {
+PrecedenceLevel precedence(TokenType token) {
 	switch ( token ) {
 		case TokenType::VALUE_NUMBER:
 		case TokenType::VALUE_IDENTIFIER: {
@@ -73,7 +74,7 @@ std::vector<std::string> lexer(std::string term) {
 	for ( auto termIter = term.begin();
 	      termIter     != term.end();
 	      termIter++ ) {
-		token = getTokenType(*termIter);
+		token = determineToken(*termIter);
 
 		if ( token    == TokenType::VALUE_NUMBER     ||
 		     token    == TokenType::VALUE_IDENTIFIER ||
@@ -158,6 +159,14 @@ std::vector<std::string> lexer(std::string term) {
 	}
 
 	return output;
+}
+
+double doubleToString(const std::string& str) {
+	double value;
+	std::istringstream convertStream(str);
+	convertStream >> value;
+
+	return value;
 }
 
 }

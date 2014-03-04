@@ -9,12 +9,19 @@
 
 namespace SimpleParser {
 
-Node* topNodeFrom(const std::stack<Node*>& stack) {
+inline Node* topNode(const std::stack<Node*>& stack) {
 	if ( !stack.empty() ) {
 		return stack.top();
 	} else {
 		throw operator_exception();
 	}
+}
+
+inline Node* popNode(std::stack<Node*>& stack) {
+	Node*const tmp = topNode(stack);
+	stack.pop();
+
+	return tmp;
 }
 
 Tree::Tree(std::string term):
@@ -38,52 +45,55 @@ std::string Tree::print() {
 	out.precision(std::numeric_limits<double>::digits10);
 
 	out << "digraph \""
-		<< this->term_
-		<< "\""
-		<< std::endl;
-	out << "{" << std::endl;
-	out << "node [shape = box];" << std::endl;
+	    << this->term_
+	    << "\""
+	    << std::endl
+	    << "{" << std::endl
+	    << "node [shape = box];" 
+	    << std::endl;
 
-	int i = 0;
+	size_t i{};
 
-	for ( auto it = this->node_collection_.begin();
-	      it     != this->node_collection_.end();
-	      ++it ) {
+	for ( auto&& node : this->node_collection_ ) {
 		out << "node"
-			<< i
-			<< " [ label = \""
-			<< (*it)->print()
-			<< "\"];"
-			<< std::endl;
+		    << i
+		    << " [ label = \""
+		    << node->print()
+		    << "\"];"
+		    << std::endl;
 
-		if ( (*it)->getType() == NodeType::OPERATOR ) {
-			for ( auto iter = this->node_collection_.begin();
-			      iter     != this->node_collection_.end();
-			      ++iter ) {
-				if ( (*iter).get() == (*it)->leftChild ) {
+		if ( node->type() == NodeType::OPERATOR ) {
+			size_t j{};
+
+			for ( auto&& child : this->node_collection_ ) {
+				if ( child.get() == node->leftChild ) {
 					out << "\"node"
-						<< i
-						<< "\" -> \"node"
-						<< (iter - this->node_collection_.begin())
-						<< "\";"
-						<< std::endl;
+					    << i
+					    << "\" -> \"node"
+					    << j
+					    << "\";"
+					    << std::endl;
 				}
-				if ( (*iter).get() == (*it)->rightChild ) {
+
+				if ( child.get() == node->rightChild ) {
 					out << "\"node"
-						<< i
-						<< "\" -> \"node"
-						<< (iter - this->node_collection_.begin())
-						<< "\";"
-						<< std::endl;
+					    << i
+					    << "\" -> \"node"
+					    << j
+					    << "\";"
+					    << std::endl;
 				}
+
+				++j;
 			}
 		}
 
-		i++;
+		++i;
 	}
-	
-	out << "}" << std::endl;
-	
+
+	out << "}"
+	    << std::endl;
+
 	return out.str();
 }
 
@@ -101,72 +111,63 @@ Node* Tree::addNode(Node** place, Args&&... args) {
 }
 
 Node* Tree::buildTree(std::string term) {
-	std::stack<Node*> operandStack;
-	std::stack<Node*> operatorStack;
+	std::stack<Node*> operands;
+	std::stack<Node*> operators;
 
-	std::vector<std::string> tmpLexer;
-	std::vector<std::string> lexerOutput = lexer(term);
+	std::vector<std::string> topElements(lexer(term));
 
-	for ( auto termIter = lexerOutput.begin();
-	      termIter     != lexerOutput.end();
-	      termIter++ ) {
-		const std::string& currTerm = (*termIter);
-		const TokenType token       = getTokenType(currTerm[0]);
+	for ( auto elementIterator = topElements.begin();
+	      elementIterator     != topElements.end();
+	      ++elementIterator ) {
+		const std::string& element   = *elementIterator;
+		const TokenType elementToken = determineToken(element[0]);
 
-		if ( token              != TokenType::VALUE_NUMBER     && 
-		     token              != TokenType::VALUE_IDENTIFIER &&
-		     (*termIter).size() == 1 ) {
-			if ( !operatorStack.empty() ) {
-				OperatorNode* lastNode(
-					static_cast<OperatorNode*>(topNodeFrom(operatorStack))
+		if ( elementToken      != TokenType::VALUE_NUMBER     &&
+		     elementToken      != TokenType::VALUE_IDENTIFIER &&
+		     element.size()    == 1 ) {
+			if ( operators.empty() ) {
+				operators.push(
+					this->addNode<OperatorNode>(nullptr, elementToken)
+				);
+			} else {
+				OperatorNode*const lastNode(
+					static_cast<OperatorNode*>(topNode(operators))
 				);
 
-				if ( getPrecedence(token) > getPrecedence(lastNode->getToken()) ) {
-					operatorStack.push( 
-						this->addNode<OperatorNode>(nullptr, token)
+				if ( precedence(elementToken) > precedence(lastNode->token()) ) {
+					operators.push( 
+						this->addNode<OperatorNode>(nullptr, elementToken)
 					);
 				} else {
-					Node* currOperator = topNodeFrom(operatorStack);
-					operatorStack.pop();
+					Node*const currOperator  = popNode(operators);
+					currOperator->rightChild = popNode(operands);
+					currOperator->leftChild  = popNode(operands);
 
-					currOperator->rightChild = topNodeFrom(operandStack);
-					operandStack.pop();
+					operands.push(currOperator);
 
-					currOperator->leftChild  = topNodeFrom(operandStack);
-					operandStack.pop();
-
-					operandStack.push(currOperator);
-
-					termIter--;
+					--elementIterator;
 				}
-			} else {
-				operatorStack.push(
-					this->addNode<OperatorNode>(nullptr, token)
-				);
 			}
 		} else {
-			tmpLexer = lexer(*termIter);
+			std::vector<std::string> subElements(lexer(element));
 
-			if ( tmpLexer.size() == 1 ) {
-				switch ( getTokenType(tmpLexer[0][0]) ) {
+			if ( subElements.size() == 1 ) {
+				switch ( determineToken(subElements[0][0]) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
-						double value;
-						std::istringstream convertStream(tmpLexer[0]);
-						convertStream >> value;
-
-						operandStack.push(
-							this->addNode<OperandNode>(nullptr, value)
-						);
+						operands.push(this->addNode<OperandNode>(
+							nullptr,
+							doubleToString(subElements[0])
+						));
 
 						break;
 					}
 					case TokenType::VALUE_IDENTIFIER: {
-						operandStack.push(
-							this->addNode<ConstantNode>(nullptr,
-							                            tmpLexer[0],
-							                            this->constants_)
-						);
+						operands.push(this->addNode<ConstantNode>(
+							nullptr,
+							subElements[0],
+							this->constants_
+						));
 
 						break;
 					}
@@ -175,29 +176,25 @@ Node* Tree::buildTree(std::string term) {
 					}
 				}
 			} else {
-				operandStack.push(
-					buildTree(*termIter)
+				operands.push(
+					buildTree(element)
 				);
 			}
 		}
 	}
 
-	while ( !operatorStack.empty() ) {
-		OperatorNode *currOperator(
-			static_cast<OperatorNode*>(topNodeFrom(operatorStack))
+	while ( !operators.empty() ) {
+		OperatorNode*const currOperator(
+			static_cast<OperatorNode*const>(popNode(operators))
 		);
-		operatorStack.pop();
 
-		currOperator->rightChild = topNodeFrom(operandStack);
-		operandStack.pop();
+		currOperator->rightChild = popNode(operands);
+		currOperator->leftChild  = popNode(operands);
 
-		currOperator->leftChild  = topNodeFrom(operandStack);
-		operandStack.pop();
-
-		operandStack.push(currOperator);
+		operands.push(currOperator);
 	}
 
-	return topNodeFrom(operandStack);
+	return popNode(operands);
 }
 
 }
