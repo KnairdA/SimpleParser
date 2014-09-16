@@ -7,7 +7,7 @@
 
 namespace SimpleParser {
 
-TokenType determineToken(char tmp) {
+TokenType determineToken(const char tmp) {
 	if ( std::isalpha(tmp) ) {
 		return TokenType::VALUE_IDENTIFIER;
 	} else {
@@ -34,7 +34,7 @@ TokenType determineToken(char tmp) {
 	}
 }
 
-PrecedenceLevel precedence(TokenType token) {
+PrecedenceLevel precedence(const TokenType token) {
 	switch ( token ) {
 		case TokenType::VALUE_NUMBER:
 		case TokenType::VALUE_IDENTIFIER: {
@@ -62,75 +62,94 @@ PrecedenceLevel precedence(TokenType token) {
 }
 
 std::vector<std::string> lexer(std::string term) {
-	std::string tmp;
-	std::string tmpNumber;
-	std::string tmpIdentifier;
-	std::vector<std::string> output;
-	TokenType token;
-	TokenType lastToken;
+	std::vector<std::string> resultBuffer;
 
-	uint32_t level = 0;
+	std::string levelBuffer;
+	std::string numberBuffer;
+	std::string identifierBuffer;
 
-	for ( auto termIter = term.begin();
-	      termIter     != term.end();
-	      termIter++ ) {
-		token = determineToken(*termIter);
+	TokenType   previousToken;
+	uint32_t    level{0};
+
+	for ( auto&& termIter = term.begin();
+	      termIter        < term.end();
+	      ++termIter ) {
+		const TokenType token{ determineToken(*termIter) };
 
 		if ( token    == TokenType::VALUE_NUMBER     ||
 		     token    == TokenType::VALUE_IDENTIFIER ||
 		   ( token    == TokenType::OPERATOR_MINUS   &&
 		     termIter == term.begin() ) ) {
 			if ( level > 0 ) {
-				tmp += *termIter;
+				levelBuffer += *termIter;
 			} else {
-				if ( token == TokenType::VALUE_NUMBER ||
-				     token == TokenType::OPERATOR_MINUS ) {
-					tmpNumber += *termIter;
-				} else if ( token == TokenType::VALUE_IDENTIFIER ) {
-					tmpIdentifier += *termIter;
+				switch ( token ) {
+					case TokenType::VALUE_NUMBER:
+					case TokenType::OPERATOR_MINUS: {
+						numberBuffer += *termIter;
+
+						break;
+					}
+					case TokenType::VALUE_IDENTIFIER: {
+						identifierBuffer += *termIter;
+
+						break;
+					}
+					default: {
+						break;
+					}
 				}
 			}
 		} else {
 			if ( level == 0 ) {
-				if ( lastToken == TokenType::VALUE_NUMBER ) {
-					output.push_back(tmpNumber);
-					tmpNumber.clear();
-				} else if ( lastToken == TokenType::VALUE_IDENTIFIER ) {
-					output.push_back(tmpIdentifier);
-					tmpIdentifier.clear();
+				switch ( previousToken ) {
+					case TokenType::VALUE_NUMBER: {
+						resultBuffer.push_back(numberBuffer);
+						numberBuffer.clear();
+
+						break;
+					}
+					case TokenType::VALUE_IDENTIFIER: {
+						resultBuffer.push_back(identifierBuffer);
+						identifierBuffer.clear();
+
+						break;
+					}
+					default: {
+						break;
+					}
 				}
 			}
 
 			switch ( token ) {
 				case TokenType::PARENTHESES_OPEN: {
 					if ( level > 0 ) {
-						tmp += *termIter;
+						levelBuffer += *termIter;
 					}
 
-					level++;
+					++level;
 
 					break;
 				}
 				case TokenType::PARENTHESES_CLOSE: {
-					level--;
+					--level;
 
 					if ( level == 0 ) {
-						output.push_back(tmp);
-						tmp.clear();
+						resultBuffer.push_back(levelBuffer);
+						levelBuffer.clear();
 					} else {
-						tmp += *termIter;
+						levelBuffer += *termIter;
 					}
 
 					break;
 				}
 				default: {
 					if ( level == 0 ) {
-						std::string helper;
-						helper = *termIter;
+						const std::string helper{ *termIter };
 
-						output.push_back(helper);
+						resultBuffer.push_back(helper);
 					} else {
-						tmp += *termIter;
+						levelBuffer += *termIter;
 					}
 
 					break;
@@ -138,27 +157,38 @@ std::vector<std::string> lexer(std::string term) {
 			}
 		}
 
-		lastToken = token;
+		previousToken = token;
 	}
 
-	if ( lastToken == TokenType::VALUE_NUMBER ) {
-		output.push_back(tmpNumber);
-	} else if ( lastToken == TokenType::VALUE_IDENTIFIER ) {
-		output.push_back(tmpIdentifier);
-	} else if ( lastToken != TokenType::PARENTHESES_CLOSE ) {
-		throw operator_exception();
+	switch ( previousToken ) {
+		case TokenType::VALUE_NUMBER: {
+			resultBuffer.push_back(numberBuffer);
+
+			break;
+		}
+		case TokenType::VALUE_IDENTIFIER: {
+			resultBuffer.push_back(identifierBuffer);
+
+			break;
+		}
+		case TokenType::PARENTHESES_CLOSE: {
+			break;
+		}
+		default: {
+			throw operator_exception();
+		}
 	}
 
 	if ( level != 0 ) {
 		throw parenthese_exception();
 	}
 
-	if ( lastToken     == TokenType::PARENTHESES_CLOSE &&
-	     output.size() == 1 ) {
-		output = lexer(output[0]);
+	if ( previousToken == TokenType::PARENTHESES_CLOSE &&
+	     resultBuffer.size() == 1 ) {
+		resultBuffer = lexer(resultBuffer[0]);
 	}
 
-	return output;
+	return resultBuffer;
 }
 
 double doubleToString(const std::string& str) {

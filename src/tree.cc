@@ -100,7 +100,7 @@ std::string Tree::print() {
 template <typename NType, typename... Args>
 Node* Tree::addNode(Node** place, Args&&... args) {
 	this->node_collection_.emplace_back(
-		new NType(std::forward<Args>(args)...)
+		std::make_unique<NType>(std::forward<Args>(args)...)
 	);
 
 	if ( place != nullptr ) {

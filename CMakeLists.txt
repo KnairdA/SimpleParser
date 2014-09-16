@@ -3,7 +3,7 @@ project(SimpleParser)
 
 set(
 	CMAKE_CXX_FLAGS
-	"-std=c++11 -W -Wall -Wextra -Winline -pedantic"
+	"-std=c++14 -W -Wall -Wextra -Winline -pedantic"
 )
 
 add_library(

@@ -14,5 +14,5 @@ The implementation itself does not use any external libraries and relies fully o
 
 ## Requirements:
 
-- C++ compiler with support for new C++11 language and standard library features such as the `auto` keyword and `unique_ptr` (tested with GCC 4.7.2 on Linux)
+- C++ compiler with support for C++14
 - [GoogleTest](http://code.google.com/p/googletest/) for tests

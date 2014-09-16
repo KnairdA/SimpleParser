@@ -49,12 +49,11 @@ double OperatorNode::solve() {
 			);
 		}
 		case TokenType::OPERATOR_DIVIDE: {
-			double rightChild = this->rightChild->solve();
+			const double rightChild{ this->rightChild->solve() };
 			
 			if ( rightChild != 0 ) {
 				return this->leftChild->solve() / rightChild;
-			}
-			else {
+			} else {
 				throw divide_exception();
 			}
 		}
