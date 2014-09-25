@@ -10,17 +10,13 @@
 namespace SimpleParser {
 
 OperandNode::OperandNode(double value):
-	value_(value) { }
+	value_{value} { }
 
-double OperandNode::solve() {
+double OperandNode::solve() const {
 	return this->value_;
 }
 
-NodeType OperandNode::type() {
-	return NodeType::OPERAND;
-}
-
-std::string OperandNode::print() {
+std::string OperandNode::print() const {
 	std::stringstream convertStream;
 	convertStream.precision(std::numeric_limits<double>::digits10);
 
@@ -30,9 +26,9 @@ std::string OperandNode::print() {
 }
 
 OperatorNode::OperatorNode(TokenType token):
-	operator_(token) { }
+	operator_{token} { }
 
-double OperatorNode::solve() {
+double OperatorNode::solve() const {
 	switch ( this->operator_ ) {
 		case TokenType::OPERATOR_MULTIPLY: {
 			return this->leftChild->solve() * this->rightChild->solve();
@@ -63,11 +59,7 @@ double OperatorNode::solve() {
 	}
 }
 
-NodeType OperatorNode::type() {
-	return NodeType::OPERATOR;
-}
-
-std::string OperatorNode::print() {
+std::string OperatorNode::print() const {
 	switch ( this->operator_ ) {
 		case TokenType::OPERATOR_PLUS: {
 			return std::string(1, '+');
@@ -90,21 +82,23 @@ std::string OperatorNode::print() {
 	}
 }
 
-TokenType OperatorNode::token() {
+TokenType OperatorNode::token() const {
 	return this->operator_;
 }
 
-ConstantNode::ConstantNode(std::string identifier,
-                           const ConstantMap* constants):
+ConstantNode::ConstantNode(
+	const std::string& identifier,
+	const ConstantMap* constants
+):
 	identifier_(identifier),
 	constants_(constants) { }
 
-double ConstantNode::solve() {
+double ConstantNode::solve() const {
 	if ( this->constants_ != nullptr ) {
 		try {
 			return this->constants_->at(this->identifier_);
 		}
-		catch ( std::out_of_range &e ) {
+		catch ( std::out_of_range& ) {
 			throw identifier_exception();
 		}
 	} else {
@@ -112,11 +106,7 @@ double ConstantNode::solve() {
 	}
 }
 
-NodeType ConstantNode::type() {
-	return NodeType::CONSTANT;
-}
-
-std::string ConstantNode::print() {
+std::string ConstantNode::print() const {
 	return this->identifier_;
 }
 

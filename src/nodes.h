@@ -9,61 +9,56 @@ namespace SimpleParser {
 enum class TokenType;
 typedef std::map<std::string, double> ConstantMap;
 
-enum class NodeType {
-	OPERAND,
-	OPERATOR,
-	CONSTANT,
-};
-
 class Node {
 	public:
 		virtual ~Node() {};
 
-		virtual double solve()      = 0;
-		virtual NodeType type()     = 0;
-		virtual std::string print() = 0;
+		virtual double solve()      const = 0;
+		virtual std::string print() const = 0;
 
 		Node* leftChild;
 		Node* rightChild;
+
 };
 
 class OperatorNode: public Node {
 	public:
 		explicit OperatorNode(TokenType);
 
-		virtual double solve();
-		virtual NodeType type();
-		virtual std::string print();
+		TokenType token() const;
 
-		TokenType token();
+		virtual double solve()      const;
+		virtual std::string print() const;
+
 
 	private:
-		TokenType operator_;
+		const TokenType operator_;
+
 };
 
 class OperandNode: public Node {
 	public:
 		explicit OperandNode(double);
 
-		virtual double solve();
-		virtual NodeType type();
-		virtual std::string print();
+		virtual double solve()      const;
+		virtual std::string print() const;
 
 	private:
-		double value_;
+		const double value_;
+
 };
 
 class ConstantNode: public Node {
 	public:
-		explicit ConstantNode(std::string, const ConstantMap*);
+		ConstantNode(const std::string&, const ConstantMap*);
 
-		virtual double solve();
-		virtual NodeType type();
-		virtual std::string print();
+		virtual double solve()      const;
+		virtual std::string print() const;
 
 	private:
-		std::string identifier_;
-		const ConstantMap* constants_;
+		const std::string identifier_;
+		const ConstantMap* const constants_;
+
 };
 
 }
