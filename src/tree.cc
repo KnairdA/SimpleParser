@@ -7,28 +7,26 @@
 
 #include "utils.h"
 
-namespace SimpleParser {
+namespace {
+	using SimpleParser::Node;
 
-inline Node* topNode(const std::stack<Node*>& stack) {
-	if ( !stack.empty() ) {
-		return stack.top();
-	} else {
-		throw operator_exception();
+	inline Node* topNode(const std::stack<Node*>& stack) {
+		if ( !stack.empty() ) {
+			return stack.top();
+		} else {
+			throw SimpleParser::operator_exception();
+		}
+	}
+
+	inline Node* popNode(std::stack<Node*>& stack) {
+		Node*const tmp = topNode(stack);
+		stack.pop();
+
+		return tmp;
 	}
 }
 
-inline Node* popNode(std::stack<Node*>& stack) {
-	Node*const tmp = topNode(stack);
-	stack.pop();
-
-	return tmp;
-}
-
-Tree::Tree(std::string term):
-	term_(term),
-	constants_(nullptr) {
-	this->root_node_ = this->buildTree(term);
-}
+namespace SimpleParser {
 
 Tree::Tree(std::string term, const ConstantMap* constants):
 	term_(term),
