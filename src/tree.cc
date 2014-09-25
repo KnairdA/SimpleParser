@@ -28,17 +28,23 @@ namespace {
 
 namespace SimpleParser {
 
-Tree::Tree(std::string term, const ConstantMap* constants):
+Tree::Tree(
+	const std::string& term,
+	const ConstantMap* constants
+):
 	term_(term),
-	constants_(constants) {
-	this->root_node_ = this->buildTree(term);
-}
+	constants_(constants),
+	node_collection_(),
+	root_node_{ this->buildTree(term) } { }
 
-double Tree::solve() {
+Tree::Tree(const std::string& term):
+	Tree(term, nullptr) { }
+
+double Tree::solve() const {
 	return this->root_node_->solve();
 }
 
-std::string Tree::print() {
+std::string Tree::print() const {
 	std::stringstream out;
 	out.precision(std::numeric_limits<double>::digits10);
 
@@ -60,7 +66,8 @@ std::string Tree::print() {
 		    << "\"];"
 		    << std::endl;
 
-		if ( node->type() == NodeType::OPERATOR ) {
+		if ( node->rightChild != nullptr &&
+		     node->leftChild  != nullptr ) {
 			size_t j{};
 
 			for ( auto&& child : this->node_collection_ ) {

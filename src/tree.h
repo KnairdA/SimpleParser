@@ -11,21 +11,22 @@ namespace SimpleParser {
 
 class Tree {
 	public:
-		explicit Tree(std::string);
-		Tree(std::string, const ConstantMap*);
+		Tree(const std::string&, const ConstantMap*);
+		explicit Tree(const std::string&);
 
-		double solve();
-		std::string print();
+		double solve()      const;
+		std::string print() const;
 
 	private:
 		template <class NType, typename... Args>
 		Node* addNode(Node**, Args&&... args);
 		Node* buildTree(std::string);
 
-		std::string term_;
-		Node* root_node_;
-		std::vector<std::unique_ptr<Node>> node_collection_;
+		const std::string  term_;
 		const ConstantMap* constants_;
+
+		std::vector<std::unique_ptr<Node>> node_collection_;
+		Node* const root_node_;
 };
 
 }
