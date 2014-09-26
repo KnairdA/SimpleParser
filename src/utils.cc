@@ -34,6 +34,10 @@ TokenType determineToken(const char tmp) {
 	}
 }
 
+TokenType determineToken(const std::string& tmp) {
+	return determineToken(tmp.front());
+}
+
 PrecedenceLevel precedence(const TokenType token) {
 	switch ( token ) {
 		case TokenType::VALUE_NUMBER:
@@ -61,7 +65,7 @@ PrecedenceLevel precedence(const TokenType token) {
 	}
 }
 
-std::vector<std::string> lexer(std::string term) {
+std::vector<std::string> lexer(const std::string& term) {
 	std::vector<std::string> resultBuffer;
 
 	std::string levelBuffer;
@@ -185,7 +189,7 @@ std::vector<std::string> lexer(std::string term) {
 
 	if ( previousToken == TokenType::PARENTHESES_CLOSE &&
 	     resultBuffer.size() == 1 ) {
-		resultBuffer = lexer(resultBuffer[0]);
+		resultBuffer = lexer(resultBuffer.front());
 	}
 
 	return resultBuffer;

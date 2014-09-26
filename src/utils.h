@@ -28,9 +28,10 @@ enum class TokenType {
 	VALUE_IDENTIFIER,
 };
 
-TokenType determineToken(char);
+TokenType determineToken(const char);
+TokenType determineToken(const std::string&);
 PrecedenceLevel precedence(TokenType);
-std::vector<std::string> lexer(std::string);
+std::vector<std::string> lexer(const std::string&);
 
 double doubleToString(const std::string&);
 

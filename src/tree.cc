@@ -117,7 +117,7 @@ Node* Tree::buildTree(const std::string& term) {
 	      elementIterator     != topElements.end();
 	      ++elementIterator ) {
 		const std::string& element   = *elementIterator;
-		const TokenType elementToken = determineToken(element[0]);
+		const TokenType elementToken = determineToken(element.front());
 
 		if ( elementToken      != TokenType::VALUE_NUMBER     &&
 		     elementToken      != TokenType::VALUE_IDENTIFIER &&
@@ -151,18 +151,18 @@ Node* Tree::buildTree(const std::string& term) {
 			};
 
 			if ( subElements.size() == 1 ) {
-				switch ( determineToken(subElements[0][0]) ) {
+				switch ( determineToken(subElements.front()) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
 						operands.push(this->addNode<OperandNode>(
-							doubleToString(subElements[0])
+							doubleToString(subElements.front())
 						));
 
 						break;
 					}
 					case TokenType::VALUE_IDENTIFIER: {
 						operands.push(this->addNode<ConstantNode>(
-							subElements[0],
+							subElements.front(),
 							this->constants_
 						));
 
