@@ -18,9 +18,10 @@ class Tree {
 		std::string print() const;
 
 	private:
-		template <class NType, typename... Args>
-		Node* addNode(Node**, Args&&... args);
-		Node* buildTree(std::string);
+		template <class NodeType, typename... Args>
+		Node* addNode(Args&&... args);
+
+		Node* buildTree(const std::string&);
 
 		const std::string  term_;
 		const ConstantMap* constants_;

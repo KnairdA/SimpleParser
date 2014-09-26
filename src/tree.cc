@@ -52,15 +52,16 @@ std::string Tree::print() const {
 	    << this->term_
 	    << "\""
 	    << std::endl
-	    << "{" << std::endl
+	    << "{"
+	    << std::endl
 	    << "node [shape = box];" 
 	    << std::endl;
 
-	size_t i{};
+	std::size_t nodeIndex{};
 
 	for ( auto&& node : this->node_collection_ ) {
 		out << "node"
-		    << i
+		    << nodeIndex 
 		    << " [ label = \""
 		    << node->print()
 		    << "\"];"
@@ -68,58 +69,49 @@ std::string Tree::print() const {
 
 		if ( node->rightChild != nullptr &&
 		     node->leftChild  != nullptr ) {
-			size_t j{};
+			std::size_t childIndex{};
 
 			for ( auto&& child : this->node_collection_ ) {
-				if ( child.get() == node->leftChild ) {
+				if ( child.get() == node->leftChild  ||
+				     child.get() == node->rightChild ) {
 					out << "\"node"
-					    << i
-					    << "\" -> \"node"
-					    << j
+					    << nodeIndex 
+					    <<  "\" -> \"node"
+					    << childIndex 
 					    << "\";"
 					    << std::endl;
 				}
 
-				if ( child.get() == node->rightChild ) {
-					out << "\"node"
-					    << i
-					    << "\" -> \"node"
-					    << j
-					    << "\";"
-					    << std::endl;
-				}
-
-				++j;
+				++childIndex;
 			}
 		}
 
-		++i;
+		++nodeIndex;
 	}
 
-	out << "}"
-	    << std::endl;
+	out << "}" << std::endl;
 
 	return out.str();
 }
 
-template <typename NType, typename... Args>
-Node* Tree::addNode(Node** place, Args&&... args) {
+template <typename NodeType, typename... Args>
+Node* Tree::addNode(Args&&... args) {
 	this->node_collection_.emplace_back(
-		std::make_unique<NType>(std::forward<Args>(args)...)
+		std::make_unique<NodeType>(
+			std::forward<Args>(args)...
+		)
 	);
-
-	if ( place != nullptr ) {
-		*place = this->node_collection_.back().get();
-	}
 
 	return this->node_collection_.back().get();
 }
 
-Node* Tree::buildTree(std::string term) {
+Node* Tree::buildTree(const std::string& term) {
 	std::stack<Node*> operands;
 	std::stack<Node*> operators;
 
-	std::vector<std::string> topElements(lexer(term));
+	const std::vector<std::string> topElements{
+		lexer(term)
+	};
 
 	for ( auto elementIterator = topElements.begin();
 	      elementIterator     != topElements.end();
@@ -132,7 +124,7 @@ Node* Tree::buildTree(std::string term) {
 		     element.size()    == 1 ) {
 			if ( operators.empty() ) {
 				operators.push(
-					this->addNode<OperatorNode>(nullptr, elementToken)
+					this->addNode<OperatorNode>(elementToken)
 				);
 			} else {
 				OperatorNode*const lastNode(
@@ -141,7 +133,7 @@ Node* Tree::buildTree(std::string term) {
 
 				if ( precedence(elementToken) > precedence(lastNode->token()) ) {
 					operators.push( 
-						this->addNode<OperatorNode>(nullptr, elementToken)
+						this->addNode<OperatorNode>(elementToken)
 					);
 				} else {
 					Node*const currOperator  = popNode(operators);
@@ -154,14 +146,15 @@ Node* Tree::buildTree(std::string term) {
 				}
 			}
 		} else {
-			std::vector<std::string> subElements(lexer(element));
+			const std::vector<std::string> subElements{
+				lexer(element)
+			};
 
 			if ( subElements.size() == 1 ) {
 				switch ( determineToken(subElements[0][0]) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
 						operands.push(this->addNode<OperandNode>(
-							nullptr,
 							doubleToString(subElements[0])
 						));
 
@@ -169,7 +162,6 @@ Node* Tree::buildTree(std::string term) {
 					}
 					case TokenType::VALUE_IDENTIFIER: {
 						operands.push(this->addNode<ConstantNode>(
-							nullptr,
 							subElements[0],
 							this->constants_
 						));
