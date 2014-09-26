@@ -30,28 +30,22 @@ OperatorNode::OperatorNode(TokenType token):
 
 double OperatorNode::solve() const {
 	switch ( this->operator_ ) {
-		case TokenType::OPERATOR_MULTIPLY: {
-			return this->leftChild->solve() * this->rightChild->solve();
-		}
 		case TokenType::OPERATOR_PLUS: {
 			return this->leftChild->solve() + this->rightChild->solve();
 		}
 		case TokenType::OPERATOR_MINUS: {
 			return this->leftChild->solve() - this->rightChild->solve();
 		}
+		case TokenType::OPERATOR_MULTIPLY: {
+			return this->leftChild->solve() * this->rightChild->solve();
+		}
+		case TokenType::OPERATOR_DIVIDE: {
+			return this->leftChild->solve() / this->rightChild->solve();
+		}
 		case TokenType::OPERATOR_POWER: {
 			return std::pow(
 				this->leftChild->solve(), this->rightChild->solve()
 			);
-		}
-		case TokenType::OPERATOR_DIVIDE: {
-			const double rightChild{ this->rightChild->solve() };
-			
-			if ( rightChild != 0 ) {
-				return this->leftChild->solve() / rightChild;
-			} else {
-				throw divide_exception();
-			}
 		}
 		default: {
 			throw operator_exception();

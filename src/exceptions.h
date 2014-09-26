@@ -17,13 +17,6 @@ class operator_exception: public std::exception {
 	}
 };
 
-class divide_exception: public std::exception {
-	virtual const char* what() const throw()
-	{
-		return "A divison through zero had to be prevented by the parser - check your input term.";
-	}
-};
-
 class identifier_exception: public std::exception {
 	virtual const char* what() const throw()
 	{
