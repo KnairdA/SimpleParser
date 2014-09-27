@@ -50,12 +50,7 @@ std::string Tree::print() const {
 
 	out << "digraph \""
 	    << this->term_
-	    << "\""
-	    << std::endl
-	    << "{"
-	    << std::endl
-	    << "node [shape = box];" 
-	    << std::endl;
+	    << "\" { node [shape = box]; ";
 
 	std::size_t nodeIndex{};
 
@@ -64,8 +59,7 @@ std::string Tree::print() const {
 		    << nodeIndex 
 		    << " [ label = \""
 		    << node->print()
-		    << "\"];"
-		    << std::endl;
+		    << "\"]; ";
 
 		if ( node->rightChild != nullptr &&
 		     node->leftChild  != nullptr ) {
@@ -78,8 +72,7 @@ std::string Tree::print() const {
 					    << nodeIndex 
 					    <<  "\" -> \"node"
 					    << childIndex 
-					    << "\";"
-					    << std::endl;
+					    << "\"; ";
 				}
 
 				++childIndex;
@@ -89,7 +82,7 @@ std::string Tree::print() const {
 		++nodeIndex;
 	}
 
-	out << "}" << std::endl;
+	out << " }";
 
 	return out.str();
 }
@@ -119,9 +112,9 @@ Node* Tree::buildTree(const std::string& term) {
 		const std::string& element   = *elementIterator;
 		const TokenType elementToken = determineToken(element.front());
 
-		if ( elementToken      != TokenType::VALUE_NUMBER     &&
-		     elementToken      != TokenType::VALUE_IDENTIFIER &&
-		     element.size()    == 1 ) {
+		if ( elementToken   != TokenType::VALUE_NUMBER     &&
+		     elementToken   != TokenType::VALUE_IDENTIFIER &&
+		     element.size() == 1 ) {
 			if ( operators.empty() ) {
 				operators.push(
 					this->addNode<OperatorNode>(elementToken)
@@ -155,7 +148,7 @@ Node* Tree::buildTree(const std::string& term) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
 						operands.push(this->addNode<OperandNode>(
-							doubleToString(subElements.front())
+							stringToDouble(subElements.front())
 						));
 
 						break;

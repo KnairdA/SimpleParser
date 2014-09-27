@@ -33,7 +33,7 @@ TokenType determineToken(const std::string&);
 PrecedenceLevel precedence(TokenType);
 std::vector<std::string> lexer(const std::string&);
 
-double doubleToString(const std::string&);
+double stringToDouble(const std::string&);
 
 }
 

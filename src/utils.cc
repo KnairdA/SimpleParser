@@ -195,7 +195,7 @@ std::vector<std::string> lexer(const std::string& term) {
 	return resultBuffer;
 }
 
-double doubleToString(const std::string& str) {
+double stringToDouble(const std::string& str) {
 	double value;
 	std::istringstream convertStream(str);
 	convertStream >> value;
