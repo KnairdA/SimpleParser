@@ -16,7 +16,7 @@ add_library(
 )
 
 add_executable(
-	test
+	tests
 	test.cc
 )
 
@@ -26,7 +26,7 @@ add_executable(
 )
 
 target_link_libraries(
-	test
+	tests
 	SimpleParser
 	gtest
 )
@@ -34,9 +34,10 @@ target_link_libraries(
 target_link_libraries(
 	clc
 	SimpleParser
+	boost_program_options
 )
 
 add_custom_command(
-	TARGET test
-	POST_BUILD COMMAND ./test
+	TARGET tests
+	POST_BUILD COMMAND ./tests
 )
