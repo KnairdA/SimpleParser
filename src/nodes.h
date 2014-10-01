@@ -13,11 +13,10 @@ class Node {
 	public:
 		virtual ~Node() {};
 
-		virtual double solve()      const = 0;
-		virtual std::string print() const = 0;
-
-		Node* leftChild;
-		Node* rightChild;
+		virtual double solve()              const = 0;
+		virtual std::string print()         const = 0;
+		virtual bool hasChildren()          const;
+		virtual bool isParentOf(Node*const) const;
 
 };
 
@@ -25,14 +24,20 @@ class OperatorNode: public Node {
 	public:
 		explicit OperatorNode(TokenType);
 
+		virtual double solve()              const;
+		virtual std::string print()         const;
+		virtual bool hasChildren()          const;
+		virtual bool isParentOf(Node*const) const;
+
 		TokenType token() const;
 
-		virtual double solve()      const;
-		virtual std::string print() const;
-
+		void setChildren(Node*const, Node*const);
 
 	private:
 		const TokenType operator_;
+
+		Node* right_;
+		Node* left_;
 
 };
 

@@ -4,10 +4,19 @@
 #include "exceptions.h"
 
 #include <cmath>
+#include <cassert>
 #include <sstream>
 #include <limits>
 
 namespace SimpleParser {
+
+bool Node::hasChildren() const {
+	return false;
+}
+
+bool Node::isParentOf(Node*const) const {
+	return false;
+}
 
 OperandNode::OperandNode(double value):
 	value_{value} { }
@@ -31,20 +40,20 @@ OperatorNode::OperatorNode(TokenType token):
 double OperatorNode::solve() const {
 	switch ( this->operator_ ) {
 		case TokenType::OPERATOR_PLUS: {
-			return this->leftChild->solve() + this->rightChild->solve();
+			return this->left_->solve() + this->right_->solve();
 		}
 		case TokenType::OPERATOR_MINUS: {
-			return this->leftChild->solve() - this->rightChild->solve();
+			return this->left_->solve() - this->right_->solve();
 		}
 		case TokenType::OPERATOR_MULTIPLY: {
-			return this->leftChild->solve() * this->rightChild->solve();
+			return this->left_->solve() * this->right_->solve();
 		}
 		case TokenType::OPERATOR_DIVIDE: {
-			return this->leftChild->solve() / this->rightChild->solve();
+			return this->left_->solve() / this->right_->solve();
 		}
 		case TokenType::OPERATOR_POWER: {
 			return std::pow(
-				this->leftChild->solve(), this->rightChild->solve()
+				this->left_->solve(), this->right_->solve()
 			);
 		}
 		default: {
@@ -76,8 +85,25 @@ std::string OperatorNode::print() const {
 	}
 }
 
+bool OperatorNode::hasChildren() const {
+	return this->right_ != nullptr &&
+	       this->left_  != nullptr;
+}
+
+bool OperatorNode::isParentOf(Node*const node) const {
+	return this->right_ == node ||
+	       this->left_  == node;
+}
+
 TokenType OperatorNode::token() const {
 	return this->operator_;
+}
+
+void OperatorNode::setChildren(Node*const right, Node*const left) {
+	assert(right != nullptr && left != nullptr);
+
+	this->right_ = right;
+	this->left_  = left;
 }
 
 ConstantNode::ConstantNode(

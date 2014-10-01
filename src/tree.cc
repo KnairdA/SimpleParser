@@ -61,13 +61,11 @@ std::string Tree::print() const {
 		    << node->print()
 		    << "\"]; ";
 
-		if ( node->rightChild != nullptr &&
-		     node->leftChild  != nullptr ) {
+		if ( node->hasChildren() ) {
 			std::size_t childIndex{};
 
 			for ( auto&& child : this->node_collection_ ) {
-				if ( child.get() == node->leftChild  ||
-				     child.get() == node->rightChild ) {
+				if ( node->isParentOf(child.get()) ) {
 					out << "\"node"
 					    << nodeIndex 
 					    <<  "\" -> \"node"
@@ -87,15 +85,20 @@ std::string Tree::print() const {
 	return out.str();
 }
 
-template <typename NodeType, typename... Args>
-Node* Tree::addNode(Args&&... args) {
+template <
+	typename    Type,
+	typename... Args
+>
+typename std::add_pointer<Type>::type Tree::addNode(Args&&... args) {
 	this->node_collection_.emplace_back(
-		std::make_unique<NodeType>(
+		std::make_unique<Type>(
 			std::forward<Args>(args)...
 		)
 	);
 
-	return this->node_collection_.back().get();
+	return static_cast<typename std::add_pointer<Type>::type>(
+		this->node_collection_.back().get()
+	);
 }
 
 Node* Tree::buildTree(const std::string& term) {
@@ -129,9 +132,16 @@ Node* Tree::buildTree(const std::string& term) {
 						this->addNode<OperatorNode>(elementToken)
 					);
 				} else {
-					Node*const currOperator  = popNode(operators);
-					currOperator->rightChild = popNode(operands);
-					currOperator->leftChild  = popNode(operands);
+					OperatorNode*const currOperator(
+						static_cast<OperatorNode*const>(
+							popNode(operators)
+						)
+					);
+
+					currOperator->setChildren(
+						popNode(operands),
+						popNode(operands)
+					);
 
 					operands.push(currOperator);
 
@@ -147,17 +157,21 @@ Node* Tree::buildTree(const std::string& term) {
 				switch ( determineToken(subElements.front()) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
-						operands.push(this->addNode<OperandNode>(
-							stringToDouble(subElements.front())
-						));
+						operands.push(
+							this->addNode<OperandNode>(
+								stringToDouble(subElements.front())
+							)
+						);
 
 						break;
 					}
 					case TokenType::VALUE_IDENTIFIER: {
-						operands.push(this->addNode<ConstantNode>(
-							subElements.front(),
-							this->constants_
-						));
+						operands.push(
+							this->addNode<ConstantNode>(
+								subElements.front(),
+								this->constants_
+							)
+						);
 
 						break;
 					}
@@ -175,11 +189,15 @@ Node* Tree::buildTree(const std::string& term) {
 
 	while ( !operators.empty() ) {
 		OperatorNode*const currOperator(
-			static_cast<OperatorNode*const>(popNode(operators))
+			static_cast<OperatorNode*const>(
+				popNode(operators)
+			)
 		);
 
-		currOperator->rightChild = popNode(operands);
-		currOperator->leftChild  = popNode(operands);
+		currOperator->setChildren(
+			popNode(operands),
+			popNode(operands)
+		);
 
 		operands.push(currOperator);
 	}

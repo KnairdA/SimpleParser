@@ -18,8 +18,8 @@ class Tree {
 		std::string print() const;
 
 	private:
-		template <class NodeType, typename... Args>
-		Node* addNode(Args&&... args);
+		template <class Type, typename... Args>
+		typename std::add_pointer<Type>::type addNode(Args&&... args);
 
 		Node* buildTree(const std::string&);
 
