@@ -66,13 +66,13 @@ PrecedenceLevel precedence(const TokenType token) {
 }
 
 std::vector<std::string> lexer(const std::string& term) {
-	std::vector<std::string> resultBuffer;
+	std::vector<std::string> resultBuffer{};
 
-	std::string levelBuffer;
-	std::string numberBuffer;
-	std::string identifierBuffer;
+	std::string levelBuffer{};
+	std::string numberBuffer{};
+	std::string identifierBuffer{};
 
-	TokenType   previousToken;
+	TokenType   previousToken{};
 	uint32_t    level{0};
 
 	for ( auto&& termIter = term.begin();

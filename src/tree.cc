@@ -1,6 +1,8 @@
 #include "tree.h"
 #include "exceptions.h"
 
+#include <boost/optional.hpp>
+
 #include <sstream>
 #include <limits>
 #include <stack>
@@ -10,19 +12,24 @@
 namespace {
 	using SimpleParser::Node;
 
-	inline Node* topNode(const std::stack<Node*>& stack) {
+	inline boost::optional<Node*> top(const std::stack<Node*> stack) {
 		if ( !stack.empty() ) {
-			return stack.top();
+			return boost::make_optional<Node*>(
+				stack.top()
+			);
 		} else {
-			throw SimpleParser::operator_exception();
+			return boost::optional<Node*>();
 		}
 	}
 
-	inline Node* popNode(std::stack<Node*>& stack) {
-		Node*const tmp = topNode(stack);
-		stack.pop();
+	inline boost::optional<Node*> pop(std::stack<Node*>& stack) {
+		if ( boost::optional<Node*> node{ top(stack) } ) {
+			stack.pop();
 
-		return tmp;
+			return node;
+		} else {
+			return node;
+		}
 	}
 }
 
@@ -119,33 +126,44 @@ Node* Tree::buildTree(const std::string& term) {
 		     elementToken   != TokenType::VALUE_IDENTIFIER &&
 		     element.size() == 1 ) {
 			if ( operators.empty() ) {
-				operators.push(
+				operators.emplace(
 					this->addNode<OperatorNode>(elementToken)
 				);
 			} else {
-				OperatorNode*const lastNode(
-					static_cast<OperatorNode*>(topNode(operators))
-				);
+				if ( boost::optional<Node*> lastNode{ top(operators) } ) {
+					OperatorNode*const lastOperator{
+						static_cast<OperatorNode*const>(*lastNode)
+					};
+  
+					if (   precedence(elementToken)
+					     > precedence(lastOperator->token()) ) {
+						operators.emplace( 
+							this->addNode<OperatorNode>(elementToken)
+						);
+					} else {
+						boost::optional<Node*> currentOperator{ pop(operators) };
+						boost::optional<Node*> rightChild     { pop(operands)  };
+						boost::optional<Node*> leftChild      { pop(operands)  };
 
-				if ( precedence(elementToken) > precedence(lastNode->token()) ) {
-					operators.push( 
-						this->addNode<OperatorNode>(elementToken)
-					);
+						if ( currentOperator &&
+						     rightChild      &&
+						     leftChild ) {
+							static_cast<OperatorNode*const>(
+								*currentOperator
+							)->setChildren(
+								*rightChild,
+								*leftChild
+							);
+
+							operands.emplace(*currentOperator);
+
+							--elementIterator;
+						} else {
+							throw operator_exception();
+						}
+					}
 				} else {
-					OperatorNode*const currOperator(
-						static_cast<OperatorNode*const>(
-							popNode(operators)
-						)
-					);
-
-					currOperator->setChildren(
-						popNode(operands),
-						popNode(operands)
-					);
-
-					operands.push(currOperator);
-
-					--elementIterator;
+					throw operator_exception();
 				}
 			}
 		} else {
@@ -157,7 +175,7 @@ Node* Tree::buildTree(const std::string& term) {
 				switch ( determineToken(subElements.front()) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
-						operands.push(
+						operands.emplace(
 							this->addNode<OperandNode>(
 								stringToDouble(subElements.front())
 							)
@@ -166,7 +184,7 @@ Node* Tree::buildTree(const std::string& term) {
 						break;
 					}
 					case TokenType::VALUE_IDENTIFIER: {
-						operands.push(
+						operands.emplace(
 							this->addNode<ConstantNode>(
 								subElements.front(),
 								this->constants_
@@ -180,7 +198,7 @@ Node* Tree::buildTree(const std::string& term) {
 					}
 				}
 			} else {
-				operands.push(
+				operands.emplace(
 					buildTree(element)
 				);
 			}
@@ -188,21 +206,31 @@ Node* Tree::buildTree(const std::string& term) {
 	}
 
 	while ( !operators.empty() ) {
-		OperatorNode*const currOperator(
+		boost::optional<Node*> currentOperator{ pop(operators) };
+		boost::optional<Node*> rightChild     { pop(operands)  };
+		boost::optional<Node*> leftChild      { pop(operands)  };
+
+		if ( currentOperator &&
+			 rightChild      &&
+			 leftChild ) {
 			static_cast<OperatorNode*const>(
-				popNode(operators)
-			)
-		);
+				*currentOperator
+			)->setChildren(
+				*rightChild,
+				*leftChild
+			);
 
-		currOperator->setChildren(
-			popNode(operands),
-			popNode(operands)
-		);
-
-		operands.push(currOperator);
+			operands.emplace(*currentOperator);
+		} else {
+			throw operator_exception();
+		}
 	}
 
-	return popNode(operands);
+	if ( boost::optional<Node*> rootNode{ pop(operands) } ) {
+		return *rootNode;
+	} else {
+		throw operator_exception();
+	}
 }
 
 }
