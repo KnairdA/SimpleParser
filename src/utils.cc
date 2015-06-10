@@ -7,35 +7,33 @@
 
 namespace SimpleParser {
 
-TokenType determineToken(const char tmp) {
-	if ( std::isalpha(tmp) ) {
-		return TokenType::VALUE_IDENTIFIER;
-	} else {
-		switch ( tmp ) {
-			case '-':
-				return TokenType::OPERATOR_MINUS;
-			case '+':
-				return TokenType::OPERATOR_PLUS;
-			case '/':
-				return TokenType::OPERATOR_DIVIDE;
-			case '*':
-				return TokenType::OPERATOR_MULTIPLY;
-			case '^':
-				return TokenType::OPERATOR_POWER;
-			case '(':
-				return TokenType::PARENTHESES_OPEN;
-			case ')':
-				return TokenType::PARENTHESES_CLOSE;
-			case ',':
-				return TokenType::VALUE_NUMBER;
-			default:
-				return TokenType::VALUE_NUMBER;
-		}
+TokenType determineToken(const char token) {
+	if ( std::isdigit(token) ) {
+		return TokenType::VALUE_NUMBER;
 	}
-}
 
-TokenType determineToken(const std::string& tmp) {
-	return determineToken(tmp.front());
+	switch ( token ) {
+		case '-':
+			return TokenType::OPERATOR_MINUS;
+		case '+':
+			return TokenType::OPERATOR_PLUS;
+		case '/':
+			return TokenType::OPERATOR_DIVIDE;
+		case '*':
+			return TokenType::OPERATOR_MULTIPLY;
+		case '^':
+			return TokenType::OPERATOR_POWER;
+		case '(':
+			return TokenType::PARENTHESES_OPEN;
+		case ')':
+			return TokenType::PARENTHESES_CLOSE;
+		case '.':
+			return TokenType::VALUE_NUMBER;
+		case ',':
+			return TokenType::VALUE_NUMBER;
+		default:
+			return TokenType::VALUE_IDENTIFIER;
+	}
 }
 
 PrecedenceLevel precedence(const TokenType token) {
@@ -68,12 +66,12 @@ PrecedenceLevel precedence(const TokenType token) {
 std::vector<std::string> lexer(const std::string& term) {
 	std::vector<std::string> resultBuffer{};
 
-	std::string levelBuffer{};
+	std::string nestingBuffer{};
 	std::string numberBuffer{};
 	std::string identifierBuffer{};
 
 	TokenType   previousToken{};
-	uint32_t    level{0};
+	uint8_t     nesting{0};
 
 	for ( auto&& termIter = term.begin();
 	      termIter        < term.end();
@@ -84,8 +82,8 @@ std::vector<std::string> lexer(const std::string& term) {
 		     token    == TokenType::VALUE_IDENTIFIER ||
 		   ( token    == TokenType::OPERATOR_MINUS   &&
 		     termIter == term.begin() ) ) {
-			if ( level > 0 ) {
-				levelBuffer += *termIter;
+			if ( nesting ) {
+				nestingBuffer += *termIter;
 			} else {
 				switch ( token ) {
 					case TokenType::VALUE_NUMBER:
@@ -105,7 +103,7 @@ std::vector<std::string> lexer(const std::string& term) {
 				}
 			}
 		} else {
-			if ( level == 0 ) {
+			if ( !nesting ) {
 				switch ( previousToken ) {
 					case TokenType::VALUE_NUMBER: {
 						resultBuffer.push_back(numberBuffer);
@@ -127,33 +125,33 @@ std::vector<std::string> lexer(const std::string& term) {
 
 			switch ( token ) {
 				case TokenType::PARENTHESES_OPEN: {
-					if ( level > 0 ) {
-						levelBuffer += *termIter;
+					if ( nesting ) {
+						nestingBuffer += *termIter;
 					}
 
-					++level;
+					++nesting;
 
 					break;
 				}
 				case TokenType::PARENTHESES_CLOSE: {
-					--level;
+					--nesting;
 
-					if ( level == 0 ) {
-						resultBuffer.push_back(levelBuffer);
-						levelBuffer.clear();
+					if ( nesting ) {
+						nestingBuffer += *termIter;
 					} else {
-						levelBuffer += *termIter;
+						resultBuffer.push_back(nestingBuffer);
+						nestingBuffer.clear();
 					}
 
 					break;
 				}
 				default: {
-					if ( level == 0 ) {
+					if ( nesting ) {
+						nestingBuffer += *termIter;
+					} else {
 						const std::string helper{ *termIter };
 
 						resultBuffer.push_back(helper);
-					} else {
-						levelBuffer += *termIter;
 					}
 
 					break;
@@ -183,16 +181,16 @@ std::vector<std::string> lexer(const std::string& term) {
 		}
 	}
 
-	if ( level != 0 ) {
+	if ( nesting ) {
 		throw parenthese_exception();
 	}
 
-	if ( previousToken == TokenType::PARENTHESES_CLOSE &&
+	if ( previousToken       == TokenType::PARENTHESES_CLOSE &&
 	     resultBuffer.size() == 1 ) {
-		resultBuffer = lexer(resultBuffer.front());
+		return lexer(resultBuffer.front());
+	} else {
+		return resultBuffer;
 	}
-
-	return resultBuffer;
 }
 
 double stringToDouble(const std::string& str) {

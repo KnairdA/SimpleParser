@@ -12,7 +12,7 @@
 namespace {
 	using SimpleParser::Node;
 
-	inline boost::optional<Node*> top(const std::stack<Node*> stack) {
+	boost::optional<Node*> top(const std::stack<Node*> stack) {
 		if ( !stack.empty() ) {
 			return boost::make_optional<Node*>(
 				stack.top()
@@ -22,7 +22,7 @@ namespace {
 		}
 	}
 
-	inline boost::optional<Node*> pop(std::stack<Node*>& stack) {
+	boost::optional<Node*> pop(std::stack<Node*>& stack) {
 		if ( boost::optional<Node*> node{ top(stack) } ) {
 			stack.pop();
 
@@ -63,7 +63,7 @@ std::string Tree::print() const {
 
 	for ( auto&& node : this->node_collection_ ) {
 		out << "node"
-		    << nodeIndex 
+		    << nodeIndex
 		    << " [ label = \""
 		    << node->print()
 		    << "\"]; ";
@@ -74,9 +74,9 @@ std::string Tree::print() const {
 			for ( auto&& child : this->node_collection_ ) {
 				if ( node->isParentOf(child.get()) ) {
 					out << "\"node"
-					    << nodeIndex 
+					    << nodeIndex
 					    <<  "\" -> \"node"
-					    << childIndex 
+					    << childIndex
 					    << "\"; ";
 				}
 
@@ -134,10 +134,10 @@ Node* Tree::buildTree(const std::string& term) {
 					OperatorNode*const lastOperator{
 						static_cast<OperatorNode*const>(*lastNode)
 					};
-  
+
 					if (   precedence(elementToken)
 					     > precedence(lastOperator->token()) ) {
-						operators.emplace( 
+						operators.emplace(
 							this->addNode<OperatorNode>(elementToken)
 						);
 					} else {
@@ -145,9 +145,7 @@ Node* Tree::buildTree(const std::string& term) {
 						boost::optional<Node*> rightChild     { pop(operands)  };
 						boost::optional<Node*> leftChild      { pop(operands)  };
 
-						if ( currentOperator &&
-						     rightChild      &&
-						     leftChild ) {
+						if ( currentOperator && rightChild && leftChild ) {
 							static_cast<OperatorNode*const>(
 								*currentOperator
 							)->setChildren(
@@ -172,7 +170,7 @@ Node* Tree::buildTree(const std::string& term) {
 			};
 
 			if ( subElements.size() == 1 ) {
-				switch ( determineToken(subElements.front()) ) {
+				switch ( determineToken(subElements.front().front()) ) {
 					case TokenType::VALUE_NUMBER:
 					case TokenType::OPERATOR_MINUS: {
 						operands.emplace(
@@ -210,9 +208,7 @@ Node* Tree::buildTree(const std::string& term) {
 		boost::optional<Node*> rightChild     { pop(operands)  };
 		boost::optional<Node*> leftChild      { pop(operands)  };
 
-		if ( currentOperator &&
-			 rightChild      &&
-			 leftChild ) {
+		if ( currentOperator && rightChild && leftChild ) {
 			static_cast<OperatorNode*const>(
 				*currentOperator
 			)->setChildren(

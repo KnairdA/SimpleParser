@@ -86,13 +86,13 @@ std::string OperatorNode::print() const {
 }
 
 bool OperatorNode::hasChildren() const {
-	return this->right_ != nullptr &&
-	       this->left_  != nullptr;
+	return this->right_ != nullptr
+	    && this->left_  != nullptr;
 }
 
 bool OperatorNode::isParentOf(Node*const node) const {
-	return this->right_ == node ||
-	       this->left_  == node;
+	return this->right_ == node
+	    || this->left_  == node;
 }
 
 TokenType OperatorNode::token() const {
