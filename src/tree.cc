@@ -1,8 +1,7 @@
 #include "tree.h"
 #include "exceptions.h"
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <sstream>
 #include <limits>
 #include <stack>
@@ -12,18 +11,18 @@
 namespace {
 	using SimpleParser::Node;
 
-	boost::optional<Node*> top(const std::stack<Node*> stack) {
+	std::optional<Node*> top(const std::stack<Node*> stack) {
 		if ( !stack.empty() ) {
-			return boost::make_optional<Node*>(
+			return std::make_optional<Node*>(
 				stack.top()
 			);
 		} else {
-			return boost::optional<Node*>();
+			return std::optional<Node*>();
 		}
 	}
 
-	boost::optional<Node*> pop(std::stack<Node*>& stack) {
-		if ( boost::optional<Node*> node{ top(stack) } ) {
+	std::optional<Node*> pop(std::stack<Node*>& stack) {
+		if ( std::optional<Node*> node{ top(stack) } ) {
 			stack.pop();
 
 			return node;
@@ -130,7 +129,7 @@ Node* Tree::buildTree(const std::string& term) {
 					this->addNode<OperatorNode>(elementToken)
 				);
 			} else {
-				if ( boost::optional<Node*> lastNode{ top(operators) } ) {
+				if ( std::optional<Node*> lastNode{ top(operators) } ) {
 					OperatorNode*const lastOperator{
 						static_cast<OperatorNode*const>(*lastNode)
 					};
@@ -141,9 +140,9 @@ Node* Tree::buildTree(const std::string& term) {
 							this->addNode<OperatorNode>(elementToken)
 						);
 					} else {
-						boost::optional<Node*> currentOperator{ pop(operators) };
-						boost::optional<Node*> rightChild     { pop(operands)  };
-						boost::optional<Node*> leftChild      { pop(operands)  };
+						std::optional<Node*> currentOperator{ pop(operators) };
+						std::optional<Node*> rightChild     { pop(operands)  };
+						std::optional<Node*> leftChild      { pop(operands)  };
 
 						if ( currentOperator && rightChild && leftChild ) {
 							static_cast<OperatorNode*const>(
@@ -204,9 +203,9 @@ Node* Tree::buildTree(const std::string& term) {
 	}
 
 	while ( !operators.empty() ) {
-		boost::optional<Node*> currentOperator{ pop(operators) };
-		boost::optional<Node*> rightChild     { pop(operands)  };
-		boost::optional<Node*> leftChild      { pop(operands)  };
+		std::optional<Node*> currentOperator{ pop(operators) };
+		std::optional<Node*> rightChild     { pop(operands)  };
+		std::optional<Node*> leftChild      { pop(operands)  };
 
 		if ( currentOperator && rightChild && leftChild ) {
 			static_cast<OperatorNode*const>(
@@ -222,7 +221,7 @@ Node* Tree::buildTree(const std::string& term) {
 		}
 	}
 
-	if ( boost::optional<Node*> rootNode{ pop(operands) } ) {
+	if ( std::optional<Node*> rootNode{ pop(operands) } ) {
 		return *rootNode;
 	} else {
 		throw operator_exception();
